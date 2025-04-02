@@ -1,0 +1,6 @@
+{
+	"args" : {
+		"Nombre de Prise Sortie" : {"type" : "number", "unitSystem" : "unit"}
+	},
+	"parent": ["electronique/cable"]
+}

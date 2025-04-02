@@ -1,0 +1,6 @@
+{
+	"parent" : ["adress"],
+	"args" : {
+		"name" : {"type" : "string"}
+	}
+}

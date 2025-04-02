@@ -1,0 +1,34 @@
+{
+	"args" : {
+		"A" 	: {"type" : "choice"},
+		"B" 	: {"type" : "choice", "allowNone" : false},
+		"C" 	: {"type" : "choice", "allowNone" : true},
+
+		"WrongAvailableStringNoNone"		: {"type" : "choice", "available" : "STRING"},
+		"WrongAvailableStringFalseNone"		: {"type" : "choice", "available" : "STRING", "allowNone" : false},
+		"WrongAvailableStringTrueNone"		: {"type" : "choice", "available" : "STRING", "allowNone" : true},
+
+		"WrongAvailableIntNoNone"			: {"type" : "choice", "available" : 10},
+		"WrongAvailableIntFalseNone"		: {"type" : "choice", "available" : 10, "allowNone" : false},
+		"WrongAvailableIntTrueNone"			: {"type" : "choice", "available" : 10, "allowNone" : true},
+
+		
+		"WrongAvailableFloatNoNone"			: {"type" : "choice", "available" : 5.5},
+		"WrongAvailableFloatFalseNone"		: {"type" : "choice", "available" : 5.5, "allowNone" : false},
+		"WrongAvailableFloatTrueNone"		: {"type" : "choice", "available" : 5.5, "allowNone" : true},
+
+		
+		"WrongAvailableBoolNoNone"			: {"type" : "choice", "available" : true},
+		"WrongAvailableBoolFalseNone"		: {"type" : "choice", "available" : true, "allowNone" : false},
+		"WrongAvailableBoolTrueNone"		: {"type" : "choice", "available" : true, "allowNone" : true},
+
+		
+		"WrongAvailableDictNoNone"			: {"type" : "choice", "available" : {}},		
+		"WrongAvailableDictFalseNone"		: {"type" : "choice", "available" : {}, "allowNone" : false},		
+		"WrongAvailableDictTrueNone"		: {"type" : "choice", "available" : {}, "allowNone" : true},		
+
+		"EmptyAvailable"					: {"type" : "choice", "available" : []},		
+		"WrongAvailableListType"			: {"type" : "choice", "available" : ["AZER",10,5.5,[]]}		
+
+	}
+}

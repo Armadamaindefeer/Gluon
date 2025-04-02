@@ -1,0 +1,8 @@
+{
+	"args" : {
+		"type" : {"type" : "choice", "available" : ["Anneau","Collier","Percing","Autre"]},
+		"materiaux" : {"type" : "choice", "available" : ["or", "argent", "bronze"]},
+		"size" : {"type" : "number","unitSystem": "length"}
+	},
+	"parent" : []
+}

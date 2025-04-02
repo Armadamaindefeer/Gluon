@@ -1,0 +1,6 @@
+{
+	"args" : {
+		"type" : {"type" : "string"},
+		"format" : {"type" : "choice", "available" : ["A5","A4","A3","A2","A1"]}
+	}
+}

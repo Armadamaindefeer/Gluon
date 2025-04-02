@@ -1,0 +1,9 @@
+{
+	"args" : {
+		"ValueString" 	: "LOL",
+		"ValueInt"		: 10,
+		"ValueFloat"	: 5.5,
+		"ValueBool"		: true,
+		"ValueList"		: []
+	}
+}

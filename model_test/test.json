@@ -1,0 +1,20 @@
+{
+	"args": {
+
+		"stringValue"			: "STRING",
+
+		"numberValueA"			: [5,"unit",null],
+		"numberValueB"			: [5.2,"masse","kg"],
+
+		"booleanValueA"			: true,
+		"booleanValueB"			: false,
+
+		"choiceValue"			: "A",
+
+		"objectUUIDValueA"		: {"uuid" : "0", "objectType" : "uuid"},
+		"objectNameValueA"		: {"name": "Omega", "objectType" : "name"},
+		"objectTypeValueA"		: {"type": "Universe", "objectType" : "type"}
+	},
+	
+	"version": "alpha-0.1"
+}

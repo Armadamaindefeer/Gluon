@@ -1,0 +1,49 @@
+{
+	"args": {
+		"__COMMENT_STRING_"			: {"type" : "comment" , "value": "default behaviour for allowNone : true"},
+		"stringParameterA"			: {"type": "string", "allowNone": false},
+		"stringParameterB"			: {"type": "string", "allowNone": true},
+		"stringParameterC"			: {"type": "string"},
+
+		"numberParameterA"			: {"type": "number"},
+		"numberParameterB"			: {"type": "number","unitSystem" : "unit"},
+		"numberParameterC"			: {"type": "number","unitSystem" : "percentage", "unitSuffix" : "%"},
+
+		"booleanParameter"			: {"type": "boolean"},
+		
+		"__COMMENT_CHOICE_"			: {"type" : "comment" , "value": "default behaviour for allowNone : false"},
+		"choiceParameterA"			: {"type": "choice", "available" : ["A","B","C"] , "allowNone": false},
+		"choiceParameterB"			: {"type": "choice", "available" : ["A","B","C"] , "allowNone": true},
+		"choiceParameterC"			: {"type": "choice", "available" : ["A","B","C"]},
+
+		"objectUUIDParameterA"		: {"type": "object", "objectType" : "uuid" ,"allowNone": false},
+		"objectNameParameterA"		: {"type": "object", "objectType" : "name" ,"allowNone": false},
+		"objectTypeParameterA"		: {"type": "object", "objectType" : "type" ,"allowNone": false},
+		"objectAnyParameterA_1"		: {"type": "object", "objectType" : "any", "allowNone": false},
+		"objectAnyParameterA_2"		: {"type": "object", "objectType" : "any", "allowNone": false},
+		"objectAnyParameterA_3"		: {"type": "object", "objectType" : "any", "allowNone": false},
+
+
+		"objectUUIDParameterB"		: {"type": "object", "objectType" : "uuid","allowNone": true},
+		"objectNameParameterB"		: {"type": "object", "objectType" : "name","allowNone": true},
+		"objectTypeParameterB"		: {"type": "object", "objectType" : "type" ,"allowNone": true},
+		"objectAnyParameterB_1"		: {"type": "object", "objectType" : "any", "allowNone": true},
+		"objectAnyParameterB_2"		: {"type": "object", "objectType" : "any", "allowNone": true},
+		"objectAnyParameterB_3"		: {"type": "object", "objectType" : "any", "allowNone": true},
+
+
+		"__COMMENT_OBJECT_"			: {"type" : "comment" , "value": "default behaviour for allowNone : false"},
+		"objectUUIDParameterC"		: {"type": "object", "objectType" : "uuid"},
+		"objectNameParameterC"		: {"type": "object", "objectType" : "name"},
+		"objectTypeParameterC"		: {"type": "object", "objectType" : "type"},
+		"objectAnyParameterC_1"		: {"type": "object", "objectType" : "any"},
+		"objectAnyParameterC_2"		: {"type": "object", "objectType" : "any"},
+		"objectAnyParameterC_3"		: {"type": "object", "objectType" : "any"}
+
+
+	},
+
+	"UnusedParameterExample" : "",
+	
+	"version": "alpha-0.1"
+}
