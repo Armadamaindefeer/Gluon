@@ -1,0 +1,3 @@
+[submodule "library/cmdUtils"]
+	path = library/cmdUtils
+	url = https://github.com/Armadamaindefeer/cmdUtils
