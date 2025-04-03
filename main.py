@@ -741,6 +741,12 @@ def main() -> None:
 	json.dump(RAW_CONFIG(),open("./config.json","wt"),indent="\t",ensure_ascii=False)
 
 	info("Virgil launch has succeed") #TEXT
+	print("Gluon  Copyright (C) 2022-2023  Simon Poulet-Alligand | Arma_mainfeer")
+	#print("This program comes with ABSOLUTELY NO WARRANTY; for details type `show w'.")
+	print("This program comes with ABSOLUTELY NO WARRANTY.")
+	print("This is free software, and you are welcome to redistribute it")
+	#print("under certain conditions; type `show c' for details.")
+
 	info(f"Welcome {getConfig('username')}") #TEXT
 
 	running = True
