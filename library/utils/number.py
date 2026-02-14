@@ -43,7 +43,7 @@ unit_system = {
 				"kibioctet"		: {"unitSuffix" : NoGap(HighBase1000("io"))[1::],"defaultSuffix" : "Kio", "IsFractional" : True, "Base": 1024},
 				"hour"			: {"unitSuffix" : ["s","min","h"], "defaultSuffix" : "s", "isFractional" : True, "Base": 60},
 				"unit"			: {"unitSuffix" : [""], "IsFractional" : False, "defaultSuffix" : ""},
-				"ohm"			: {"unitSuffix" : NoGap(HighBase1000("o",endSuffix=2)), "IsFractional" : True, "defaultSuffix" : "Ω", "Base" : 100}
+				"ohm"			: {"unitSuffix" : NoGap(HighBase1000("Ω",endSuffix=2)), "IsFractional" : True, "defaultSuffix" : "Ω", "Base" : 100}
 			}
 
 def convert(unitSystemName:str, targetUnit:str, currentUnit:str, number:float|int) -> tuple[float|int,str,str]:

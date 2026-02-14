@@ -1,6 +1,6 @@
 {
 	"username": "Arma",
-	"defaultInputMethod": "ByName",
+	"defaultInputMethod": "Ask",
 	"defaultContainerUUID": "0",
 	"defaultContainerName": "Omega",
 	"defaultContainerType": "Universe",

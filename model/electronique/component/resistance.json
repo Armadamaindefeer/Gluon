@@ -1,5 +1,5 @@
 {
 	"args" : {
-		"value" : {"type" : "number"}
+		"value" : {"type" : "number","unitSystem" : "ohm"}
 	}
 }
