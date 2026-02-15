@@ -50,7 +50,7 @@ def Source(source: str):
 	return __wrapper
 
 Version_changelog:dict[str,list[str]] = {
-	"v0.0.0": ["Starting experimental rewrite","Currently no useable database","Incompatible with previous installation","run stable.py if you want previous stable version"]
+	"alpha-v0.0.0": ["Starting experimental rewrite","Currently no useable database","Incompatible with previous installation","run stable.py if you want previous stable version"]
 }
 
 Version_history = list(Version_changelog.keys())
@@ -65,6 +65,13 @@ def info(text:str):
 
 def CtrlInfo():
 	info("Press CTRL + C to cancel")
+
+def legalInfo():
+	print("Gluon  Copyright (C) 2022-2026  Simon Alligand | Arma_mainfeer")
+	#print("This program comes with ABSOLUTELY NO WARRANTY; for details type `show w'.")
+	print("This program comes with ABSOLUTELY NO WARRANTY.")
+	print("This is free software, and you are welcome to redistribute it")
+	#print("under certain conditions; type `show c' for details.")
 
 def warn(text:str):
 	cutils.warn(text,SOURCE)
