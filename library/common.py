@@ -77,44 +77,48 @@ def Source(source: str):
 def log(level,source,text):
 	print(f"[{level}]({source}) : {text}")
 
+logger = {
+	"INFO" : lambda text:log("INFO",SOURCE,text),
+	"WARN" : lambda text:log("WARN",SOURCE,text),
+	"ERROR" : lambda text:log("ERROR",SOURCE,text),
+	"FATAL" : lambda text:log("FATAL",SOURCE,text),
+	"DEBUG" : lambda text:log("DEBUG",SOURCE,text),
+
+}
+
 def info(text):
-	log("INFO",SOURCE,text)
+	logger["INFO"](text)
 
 def warn(text):
-	log("WARN",SOURCE,text)
+	logger["WARN"](text)
 
 def error(text):
-	log("ERROR",SOURCE,text)
+	logger["ERROR"](text)
 
 def fatal(text):
-	log("FATAL",SOURCE,text)
+	logger["FATAL"](text)
 
 def debug(text):
-	log("DEBUG",SOURCE,text)
+	logger["DEBUG"](text)
 
 def setLogger(logger:typing.Callable):
 	global log
 	log = logger
 
 def setLoggerInfo(infoLogger):
-	global info
-	info = infoLogger
+	logger["INFO"] = infoLogger
 
 def setLoggerWarn(warnLogger):
-	global warn
-	warn = warnLogger
+	logger["WARN"] = warnLogger
 
 def setLoggerError(errorLogger):
-	global error
-	error = errorLogger
+	logger["ERROR"] = errorLogger
 
 def setLoggerFatal(fatalLogger):
-	global fatal
-	fatal = fatalLogger
+	logger["FATAL"] = fatalLogger
 
 def setLoggerDebug(debugLogger):
-	global debug
-	debug = debugLogger
+	logger["DEBUG"] = debugLogger
 
 def CtrlInfo():
 	info("Press CTRL + C to cancel")
