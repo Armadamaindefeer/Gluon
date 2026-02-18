@@ -1,7 +1,7 @@
 import library.object as object
 import library.cmdUtils.cmdUtils as cutils
 from library.cmdUtils.command import globalCommands, Wrapper
-from library.common import legalInfo, Version, Version_changelog, Version_history, info, isInteger, warn, error, SOURCE, genUUID
+from library.common import legalInfo, Version, Version_changelog, Version_history, info, warn, error, SOURCE, setLoggerInfo, setLoggerError, setLoggerWarn, setLoggerFatal, setLoggerDebug , getSource
 from library.config import getConfig, RAW_CONFIG, loadConfig
 from library.model.loader import loadModels
 import json
@@ -63,12 +63,19 @@ def main() -> None:
 
 	cutils.toggleInternalDebug()
 	cmd = cutils.CmdHandler(SOURCE)
+
+	setLoggerInfo(lambda text: cutils.info(text,getSource()))
+	setLoggerWarn(lambda text: cutils.warn(text,getSource()))
+	setLoggerError(lambda text: cutils.error(text,getSource()))
+	setLoggerFatal(lambda text: cutils.fatal(text,getSource()))
+	setLoggerDebug(lambda text: cutils.debug(text,getSource()))
+
 	Omega = object.Universe()
 
 	info(f"Initializing Gluon-{Version}") #TEXT
 
 	loadConfig("./config.json")
-	loadModels("./model/")
+	loadModels("./model_error/")
 	warn("Experimental version, proceed with caution")
 
 	latestVersion = getConfig("latestVersion")
