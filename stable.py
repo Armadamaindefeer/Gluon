@@ -723,9 +723,9 @@ def main() -> None:
 
 	info(f"Running Virgil {Version}") #TEXT
 
-	loadTypeModels("./model/")
-	loadDatabase("./database.json")
-	loadConfig("./config.json")
+	loadTypeModels("./env/model/model/")
+	loadDatabase("./env/database.json")
+	loadConfig("./env/config.json")
 
 	latestVersion = getConfig("latestVersion")
 	latestVersionIndex = Version_history.index(latestVersion)

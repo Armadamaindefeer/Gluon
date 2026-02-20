@@ -74,8 +74,8 @@ def main() -> None:
 
 	info(f"Initializing Gluon-{Version}") #TEXT
 
-	loadConfig("./config.json")
-	loadModels("./model_error/")
+	loadConfig("./env/config.json")
+	loadModels("./env/model/model_error/")
 	warn("Experimental version, proceed with caution")
 
 	latestVersion = getConfig("latestVersion")

@@ -1,7 +1,0 @@
-{
-	"args" : {
-		"length" : {"type" : "number", "unitSystem" : "length"},
-		"End-A" : {"type" : "string"},
-		"End-B" : {"type" : "string"}
-	}
-}
