@@ -6,4 +6,5 @@ class Model:
 		self.name:str
 		self.alias:str
 		self.filepath:str
-		self.metadata:dict[str,MetaDataConstructor]
+		#self.metadata:dict[str,MetaDataConstructor]
+		self.metadata:list[dict]
