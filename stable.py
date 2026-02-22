@@ -738,7 +738,7 @@ def main() -> None:
 				info("- No Changelog")
 
 	RAW_CONFIG()["latestVersion"] = Version
-	json.dump(RAW_CONFIG(),open("./config.json","wt"),indent="\t",ensure_ascii=False)
+	json.dump(RAW_CONFIG(),open("./env/config.json","wt"),indent="\t",ensure_ascii=False)
 
 	info("Virgil launch has succeed") #TEXT
 	print("Gluon  Copyright (C) 2022-2023  Simon Poulet-Alligand | Arma_mainfeer")

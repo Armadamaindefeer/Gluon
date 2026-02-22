@@ -1,9 +1,0 @@
-{
-	"username": "Arma",
-	"defaultInputMethod": "Ask",
-	"defaultContainerUUID": "0",
-	"defaultContainerName": "Omega",
-	"defaultContainerType": "Universe",
-	"saveOnExit": true,
-	"latestVersion": "alpha-v4"
-}

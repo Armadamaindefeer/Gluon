@@ -1,10 +1,9 @@
 import library.object as object
 import library.cmdUtils.cmdUtils as cutils
 from library.cmdUtils.command import globalCommands, Wrapper
-from library.common import legalInfo, Version, Version_changelog, Version_history, info, warn, error, SOURCE, setLoggerInfo, setLoggerError, setLoggerWarn, setLoggerFatal, setLoggerDebug , getSource
-from library.config import getConfig, RAW_CONFIG, loadConfig
+from library.common import legalInfo, Version, info, warn, error, SOURCE, setLoggerInfo, setLoggerError, setLoggerWarn, setLoggerFatal, setLoggerDebug , getSource
+from library.config import loadConfig
 from library.model.loader import loadModels
-import json
 import sys
 
 @Wrapper("exit","exit exitCode","Exit application on use",maxQuantity=1) #TEXT
@@ -46,18 +45,6 @@ def _help(input:cutils.InputParameter) -> None:
 			info("")
 			info(f"{topicData[input[0]]['entry'][input[1]][1]}")
 
-@Wrapper("changelog", "changelog","Get changelog for selected version",needQuantity=0) #TEXT
-def _changelog(input:cutils.InputParameter) -> None:
-	available_version = Version_history
-	choice:int = cutils.Choice("Select version (sorted from earliest to latest)",SOURCE,available_version) #TEXT
-
-	info(f"Changelog for version {available_version[choice]} :") #TEXT
-	if len(Version_changelog[available_version[choice]]) > 0:
-		for entry in Version_changelog[available_version[choice]]:
-			info(f"- {entry}")
-	else:
-		info("- No Changelog") #TEXT
-
 def main() -> None:	
 	legalInfo() #TEXT
 
@@ -74,25 +61,12 @@ def main() -> None:
 
 	info(f"Initializing Gluon-{Version}") #TEXT
 
-	loadConfig("./env/config.json")
-	loadModels("./env/model/model_error/")
-	warn("Experimental version, proceed with caution")
-
-	latestVersion = getConfig("latestVersion")
-	latestVersionIndex = Version_history.index(latestVersion)
-	for i,version in enumerate(Version_history[latestVersionIndex+1::]):
-			info(f"Changelog for version {version} :")
-			if len(Version_changelog[version]) > 0:
-				for entry in Version_changelog[version]:
-					info(f"- {entry}")
-			else:
-				info("- No Changelog")
-
-	RAW_CONFIG()["latestVersion"] = Version
-	json.dump(RAW_CONFIG(),open("./config.json","wt"),indent="\t",ensure_ascii=False)
+	config = loadConfig("./env/config.json")
+	model = loadModels("./env/model/model_error/")
+	warn("Experimental version, proceed with caution") #TEXT
 
 	info("Gluon launch has succeed") #TEXT
-	info(f"Welcome {getConfig('username')}") #TEXT
+	info(f"Welcome {config['username']}") #TEXT
 
 	running = True
 	while running:
@@ -100,8 +74,6 @@ def main() -> None:
 			cmd.handle_input()
 		except KeyboardInterrupt:
 			if cutils.Validate("Voulez vous quitter ?",SOURCE,enterIsYes=True): #TEXT
-				if getConfig("saveOnExit"):
-					...
 				sys.exit()
 
 if __name__ == "__main__":
