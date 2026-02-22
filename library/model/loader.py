@@ -1,253 +1,126 @@
-# Gluon , a terminal-based inventory manager
-# Copyright (C) 2022-2025 Simon Alligand | Arma_mainfeer
-# contact : simon.alligand@gmail.com
-
-# This program is free software: you can redistribute it and/or modify
-# it under the terms of the GNU General Public License as published by
-# the Free Software Foundation, either version 3 of the License, or
-# (at your option) any later version.
-
-# This program is distributed in the hope that it will be useful,
-# but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-# GNU General Public License for more details.
-
-# You should have received a copy of the GNU General Public License
-# along with this program.  If not, see <https://www.gnu.org/licenses/>.
-
-
-from library.common import info, jsonWrongType, warn, error, Source
-import library.cmdUtils.cmdUtils as cutils
-from library.utils.number import unit_system
-
-import os
-import typing
 import json
+import os
+import copy
+from library.dataField import validate_schema
 
-DEFAULT_ALLOW_NONE_BY_TYPE = {
-	"string" : True,
-	"number" : False,
-	"boolean" : False,
-	"choice" : False,
-	"object": False,
-	"comment" : True
-}
+KEY_METADATA = "metadata"
+KEY_PARENT = "parent"
+KEY_TYPE = "type"
+KEY_ALIAS = "alias"
+KEY_VERSI0N = "version"
+KEY_IS_CATEGORY = "isCategory"
+CURRENT_VERSION = 0
 
-typeModels = dict()
+class LoadError:
+	def __init__(self, type, args:dict=dict(),isWarning=False) -> None:
+		self.type = type
+		self.args = args
+		self.isWarning = isWarning
 
-SOURCE = "MODEL_TYPE_LOADER"
+def update(modelA:dict,modelB:dict):
+	if KEY_METADATA not in modelB:
+		pass
+	elif KEY_METADATA not in modelA:
+		modelA[KEY_METADATA] = modelB[KEY_METADATA].copy()
+	else:
+		modelA[KEY_METADATA].update(modelB[KEY_METADATA])
 
-def solveParent(modelsDict : dict,modelName,alreadyParse=[]) -> dict | str:
-	current = modelsDict[modelName]
-	if "parent" in current and len(current["parent"]) > 0:
-		for parent in current["parent"]:
-			if parent in alreadyParse:
-				return f"Inheritance loop found while solving model"
-			elif parent in modelsDict:
-				parent = solveParent(modelsDict,parent,alreadyParse+[modelName])
-				if type(parent) == str: # if it is STR, it is an error text
-					return parent
-				elif type(parent) == dict:
-					for key,value in parent.items():
-						current["args"][key] = value
-				else:
-					return "Unexpected error"
-			else:
-				return  f"Unable to find parent {current['parent']} for model : {modelName}"
-	return current["args"]
+	if KEY_PARENT not in modelB:
+		pass
+	elif KEY_PARENT not in modelA:
+		modelA[KEY_PARENT] = modelB[KEY_PARENT].copy()
+	else:
+		modelA[KEY_PARENT] = modelA[KEY_PARENT] + modelB[KEY_PARENT]
 
-@Source(SOURCE)
-def loadModels(path : str= "./model/"):
-	out = dict()
-	info("Searching models...")
-	stat_foundModel = 0
-	stat_foundModelFail = 0
-	stat_validModel = 0
-	stat_aliasModel = 0
+	if KEY_TYPE in modelA:
+		pass
+	elif KEY_TYPE not in modelB:
+		pass
+	else:
+		modelA[KEY_TYPE] = copy.copy(modelB[KEY_TYPE])
 
+def resolveParent(model:str,model_database:dict[str,dict],already_parsed:set[str]=set()):
+	already_parsed.add(model)
+	model_object = model_database[model]
+
+	if KEY_PARENT not in model_object:
+		return model_object
+
+	if type(model_object[KEY_PARENT]) != list:
+		return model_object
+	
+	for parent in model_object[KEY_PARENT]:
+		if type(parent) != str:
+			continue
+		if parent not in model_database:
+			continue
+		if parent in already_parsed:
+			continue
+
+		model_parent = model_database[parent]
+		if model_parent == model:
+			continue
+
+		update(model_object,resolveParent(parent,model_database,already_parsed))
+
+	return model_object
+
+def loadModels(path:str) -> dict:
+	
+	model_json:dict[str,dict] = dict()
 
 	for dirpath, _, files in os.walk(path):
-		for filename in files:
-			base, ext = os.path.splitext(filename)
-			if ext != ".json":
-				continue
-			else:
-				modelName = os.path.join(dirpath.removeprefix(path),base)
-				filepath = os.path.join(dirpath, filename)
-				temp = None
-				potentialError = 1
-				stat_foundModel += 1
-				try :
-					temp = json.load(open(filepath))
-				except json.decoder.JSONDecodeError as errorMsg:
-					cutils.error(f"in ({filepath}) at [{errorMsg.lineno},{errorMsg.colno}] : {errorMsg.msg}","JSON_DECODER")
-					cutils.warn(f"Rejected : {modelName} ({filepath})")
-					stat_foundModelFail += 1
+		dirpath = dirpath.removeprefix(path).replace("\\","/") + "/"
+		for file in files:
+			base, ext = os.path.splitext(file)
+			with open(path + "\\"+ dirpath + file) as f:
+				content = json.load(f)
+
+				if KEY_VERSI0N not in content:
 					continue
-				else :
-					info(f"FOUND : {modelName} ({filepath})")
-					for key in temp:
-						if key not in ["args","alias","version","parent"]:
-							warn(f"in ({filepath}) found unknown parameter ({key})")
-					if not "args" in temp:
-						#error(f"in ({filepath}) : expected \'args\' component")
-						potentialError -= 1
-						temp["args"] = dict()
-					elif type(temp["args"]) != dict:
-						jsonWrongType(dict,type(temp['args']),f"{filepath}::args")
-					else :
-						potentialError -= 1
-						for args in temp["args"]:
-							potentialError += 1
-							if type(temp["args"][args]) != dict:
-								jsonWrongType(dict,type(temp["args"][args]),f"{filepath}::args::{args}")
+				if content[KEY_VERSI0N] != CURRENT_VERSION:
+					continue
 
-							elif not "type" in temp["args"][args]:
-								error(f"in ({filepath}::args::{args}) : expected \'type\' component")
+				model_json[dirpath + base] = content
+				if KEY_ALIAS not in content:
+					continue
+				if type(content[KEY_ALIAS]) != list:
+					continue
+				
+				for alias in content[KEY_ALIAS]:
+					if type(alias) != str:
+						continue
+					if dirpath + alias in model_json:
+						continue
+					model_json[dirpath + alias] = content
+	
+	category_model = set()
 
-							elif type(temp["args"][args]["type"]) != str:
-								jsonWrongType(str,type(temp['args'][args]['type']),f"{filepath}::args::{args}::type")
+	for model_name,model_data in model_json.items():
+		model_json[model_name] = resolveParent(model_name,model_json,already_parsed=set())
 
-							elif temp["args"][args]["type"] not in ["comment","string","number","boolean","choice","object"]:
-								error(f"in ({filepath}::args::{args}::type) : expected value to be in : {['comment','string','number','boolean','choice','object']}, got \'{temp['args'][args]['type']}\'")
+		if KEY_IS_CATEGORY not in model_data:
+			continue
+		if type(model_data[KEY_IS_CATEGORY]) != bool:
+			continue
+		if model_data[KEY_IS_CATEGORY] == True:
+			category_model.add(model_name)
 
-							################################################################
-							#Choice type error
+	for model_name in model_json:
 
-							elif temp["args"][args]["type"] == "choice" and "available" not in temp["args"][args]:
-								error(f"in ({filepath}::args::{args}) : key \"available\" not found (required because \'type\' component value is \"choice\"")
-
-							elif temp["args"][args]["type"] == "choice" and type(temp["args"][args]["available"]) != list:
-								jsonWrongType(list,type(temp['args'][args]['available']),f"{filepath}::args::{args}::available")
-
-							elif temp["args"][args]["type"] == "choice" and len(temp["args"][args]["available"]) < 1:
-								error(f"in ({filepath}::args::{args}::available) : expected one ore more value")
-
-							elif temp["args"][args]["type"] == "choice" and len([ type(a) for a in temp["args"][args]["available"] if type(a) != str]) > 0:
-								jsonWrongType(list[str],"list" + str([type(a) for a in temp['args'][args]['available']]),f"{filepath}::args::{args}::available")
-
-							################################################################
-							#Object type error
-
-							elif temp["args"][args]["type"] == "object" and "objectType" not in temp["args"][args]:
-								error(f"in ({filepath}::args::{args}) : key \"objectType\" not found (required because \'type\' component value is \"object\"")
-
-							elif temp["args"][args]["type"] == "object" and type(temp["args"][args]["objectType"]) != str:
-								jsonWrongType(str,type(temp['args'][args]['type']),f"{filepath}::args::{args}::objectType")
-
-							elif temp["args"][args]["type"] == "object" and temp["args"][args]["objectType"] not in ["uuid","name","type","any"]:
-								error(f"in ({filepath}::args::{args}::objectType) : expected value to be in : {['exact','filter','any']}, got \'{temp['args'][args]['objectType']}\'")
-
-							################################################################
-							#Number type error
-
-							elif temp["args"][args]["type"] == "number" and "unitSystem" in temp["args"][args] and type(temp["args"][args]["unitSystem"]) != str:
-								jsonWrongType(str,type(temp['args'][args]['unitSystem']),f"{filepath}::args::{args}::unitSystem")
-
-							elif temp["args"][args]["type"] == "number" and  "unitSuffix" in temp["args"][args] and type(temp["args"][args]["unitSuffix"]) != str:
-								jsonWrongType(str,type(temp['args'][args]['unitSuffix']),f"{filepath}::args::{args}::unitSuffix")
-
-							elif temp["args"][args]["type"] == "number" and "unitSystem" not in temp["args"][args] and "unitSuffix" in temp["args"][args]:
-								error(f"in ({filepath}::args::{args}) : key \"unitSystem\" not found (required by key \"unitSuffix\"")
-
-							elif temp["args"][args]["type"] == "number" and "unitSystem" in temp["args"][args] and temp["args"][args]["unitSystem"] not in unit_system:
-								error(f"in ({filepath}::args::{args}::unitSystem) : unrecognised unit system \'{temp['args'][args]['unitSystem']}\', (available unit system : {list(unit_system.keys())})")
-
-							elif temp["args"][args]["type"] == "number" and "unitSuffix" in temp["args"][args] and temp["args"][args]["unitSuffix"] not in unit_system[temp["args"][args]["unitSystem"]]["unitSuffix"]:
-								error(f"in ({filepath}::args::{args}::unitSuffix) : unrecognised unit \'{temp['args'][args]['unitSuffix']}\', (available unit : {unit_system[temp['args'][args]['unitSystem']]['unitSuffix']})")
-
-							################################################################
-
-
-							elif "allowNone" in temp["args"][args] and type(temp["args"][args]["allowNone"]) != bool:
-								jsonWrongType(bool,type(temp['args'][args]['allowNone']),f"{filepath}::args::{args}::allowNone")
-
-							else:
-								for key in temp["args"][args]:
-									if key not in ["type","objectType","allowNone","objectType","value","available","unitSystem","unitSuffix"]:
-										warn(f"in ({filepath}::args) : found unknown parameter ({key})")
-								potentialError -= 1
-
-							if potentialError == 0 and "allowNone" not in temp["args"][args]:
-								temp["args"][args]["allowNone"] = DEFAULT_ALLOW_NONE_BY_TYPE[temp["args"][args]["type"]]
-					if potentialError > 0:
-						cutils.warn(f"Rejected : {modelName} ({filepath})")
-						stat_foundModelFail += 1
-					else:
-						out[modelName] = temp
-						out[modelName]["filepath"] = filepath
-						if "parent" not in temp:
-							out[modelName]["parent"] = []
-
-
-	final = dict()
-
-	for modelName,modelData in out.items():
-		result = solveParent(out,modelName)
-		if type(result) == str:
-			cutils.error(f"In {modelName} : {result}","MODEL_SOLVER")
-			cutils.warn(f"Rejected : {modelName} ({modelData['filepath']})")
-			stat_foundModelFail += 1
-		else:
-			final[modelName] = {"args" : result}
-			final[modelName]["parent"] = out[modelName]["parent"]
-			final[modelName]["filepath"] = out[modelName]["filepath"] 
-			if "alias" in out[modelName]:
-				final[modelName]["alias"] = out[modelName]["alias"]
-			stat_validModel += 1
-
-	for modelName,modelData in list(final.items()):
-		if "alias" in modelData:
-
-			if type(modelData["alias"]) != str:
-				error(f"in ({modelData['filepath']}::alias) : expected value to be {str} instead it is {type(modelData['alias'])}")
-				cutils.warn(f"Rejected : {modelName} ({modelData['filepath']})")
-				final.pop(modelName)
-				stat_validModel -= 1
-				stat_foundModelFail += 1
-
-			elif modelData["alias"].strip() == "":
+		for category_name in category_model:
+			if category_name == model_name:
 				continue
+			if model_name.startswith(category_name):
+				update(model_json[model_name],model_json[category_name])
 
-			elif not modelData["alias"] in final:
-				error(f"in ({modelData['filepath']}::alias) : unable to find model specified ({modelData['alias']})")
-				cutils.warn(f"Rejected : {modelName} ({modelData['filepath']})")
-				final.pop(modelName)
-				stat_validModel -= 1
-				stat_foundModelFail += 1
-
-			else:
-				if ("parent" in modelData and len(modelData["parent"]) > 0) or ("args" in modelData and len(modelData["args"])>0):
-					cutils.warn(f"Usage of \'alias\' parameter in an object erase existing data {modelData['filepath']})")
-				final[modelName] = final[modelData["alias"]]
-				info(f"{modelName} is now an alias for {modelData['alias']}")
-				stat_aliasModel += 1
-
-	final["Universe"] = {'args': {'name': {'type': 'string', 'allowNone': False}}, 'filepath': None, "parent": []}
-	final["Base"] = {'args' : {}, 'filepath': None, "parent": []}
-
-	info(f'Found {stat_foundModel} model : ({stat_foundModelFail} FAIL/{stat_validModel} SUCESS)')
-	info(f'Alias : {stat_aliasModel}')
-
-	info("Done !")
-	global typeModels
-	typeModels =  final
-	return final
-
-def getTypeModels() -> dict:
-	return typeModels
-
-def getTypeModelsList() -> list[str]:
-	return list(getTypeModels().keys())
-
-def getTypeModel(modelName:str) -> dict:
-	return typeModels[modelName]
-
-def isSubOf(modelName, searchParent) -> bool:
-	if getTypeModel(modelName)["parent"] == []:
-		return False
-	else:
-		for parent in getTypeModel(modelName)["parent"]:
-			if parent == searchParent or isSubOf(parent,searchParent):
-				return True
-	return False
+	for model_name,model_data in model_json.items():
+		print(model_name)
+		if not KEY_METADATA in model_data:
+			continue
+		if type(model_data[KEY_METADATA]) != dict:
+			continue
+		for name,metadata in model_data[KEY_METADATA].items():
+			print(name,metadata,validate_schema(metadata))
+		
+	return model_json
