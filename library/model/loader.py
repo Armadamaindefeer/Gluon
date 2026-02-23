@@ -3,7 +3,7 @@ import os
 import copy
 from library.dataField import validate_schema
 
-KEY_METADATA = "metadata"
+KEY_PROPERTY = "properties"
 KEY_PARENT = "parent"
 KEY_TYPE = "type"
 KEY_ALIAS = "alias"
@@ -18,12 +18,12 @@ class LoadError:
 		self.isWarning = isWarning
 
 def update(modelA:dict,modelB:dict):
-	if KEY_METADATA not in modelB:
+	if KEY_PROPERTY not in modelB:
 		pass
-	elif KEY_METADATA not in modelA:
-		modelA[KEY_METADATA] = modelB[KEY_METADATA].copy()
+	elif KEY_PROPERTY not in modelA:
+		modelA[KEY_PROPERTY] = modelB[KEY_PROPERTY].copy()
 	else:
-		modelA[KEY_METADATA].update(modelB[KEY_METADATA])
+		modelA[KEY_PROPERTY].update(modelB[KEY_PROPERTY])
 
 	if KEY_PARENT not in modelB:
 		pass
@@ -116,11 +116,11 @@ def loadModels(path:str) -> dict:
 
 	for model_name,model_data in model_json.items():
 		print(model_name)
-		if not KEY_METADATA in model_data:
+		if not KEY_PROPERTY in model_data:
 			continue
-		if type(model_data[KEY_METADATA]) != dict:
+		if type(model_data[KEY_PROPERTY]) != dict:
 			continue
-		for name,metadata in model_data[KEY_METADATA].items():
+		for name,metadata in model_data[KEY_PROPERTY].items():
 			print(name,metadata,validate_schema(metadata))
 		
 	return model_json
