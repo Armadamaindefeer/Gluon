@@ -1,0 +1,20 @@
+v1
+- Allow database manipulation
+	- object creation/destruction
+	- object storing
+	- object moving
+- Object Model
+	- user-defined
+- make API independant from user interface
+- Restore terminal user interface
+- Allow database manipulation via python command
+- Create flask server for remote use (and fast manipulation)
+
+v1.5
+- Create user utilities
+	- Stock manager : warn when object count under set threshold
+	- Generate shopping list
+
+v2
+- View : special object to see a restricted part of another universe
+- Borrowing : allow object to be borrowed by another universe
