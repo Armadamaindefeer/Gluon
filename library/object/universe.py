@@ -1,13 +1,6 @@
 from library.object import type as object_type, factory as object_factory
 from library.model import type as model_type
-from library.common import genUUID, Uuid
-from enum import IntFlag, auto
-
-class ERROR(IntFlag):
-	ALREADY_STORED = auto()
-	NOT_A_STORAGE = auto()
-	NOT_STORED = auto()
-	UNEXPECTED = auto()
+from library.common import genUUID, Uuid, ERROR
 
 class Universe:
 	def __init__(self) -> None:

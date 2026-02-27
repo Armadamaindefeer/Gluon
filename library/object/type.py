@@ -1,14 +1,8 @@
 import math
 from library.model.type import Model
-from library.common import Uuid
-from enum import IntFlag, auto
+from library.common import Uuid, ERROR
 
 unitSystem = str
-
-class ERROR(IntFlag):
-	HAS_PARENT = auto()
-	ALREADY_STORED = auto()
-	NOT_STORED = auto()
 
 class Object:
 	def __init__(self) -> None:

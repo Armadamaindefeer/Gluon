@@ -18,6 +18,7 @@
 import typing
 import uuid
 import json
+import enum
 
 Version_changelog:dict[str,list[str]] = {
 	"alpha-v0.0.0": ["Starting experimental rewrite","Currently no useable database","Incompatible with previous installation","run stable.py if you want previous stable version"]
@@ -175,4 +176,11 @@ def jsonUseDefault(defaultValue,path):
 @Source("JSON_DECODER")
 def jsonErrorSystem(errorMsg,path):
 	error(f"in ({path}) at [{errorMsg.lineno},{errorMsg.colno}] : {errorMsg.msg}")
+
+class ERROR(enum.IntFlag):
+	HAS_PARENT = enum.auto()
+	ALREADY_STORED =enum.auto()
+	NOT_STORED = enum.auto()
+	NOT_A_STORAGE = enum.auto()
+	UNEXPECTED = enum.auto()
 
