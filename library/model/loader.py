@@ -10,12 +10,7 @@ KEY_ALIAS = "alias"
 KEY_VERSI0N = "version"
 KEY_IS_CATEGORY = "isCategory"
 CURRENT_VERSION = 0
-
-class LoadError:
-	def __init__(self, type, args:dict=dict(),isWarning=False) -> None:
-		self.type = type
-		self.args = args
-		self.isWarning = isWarning
+FILE_EXT_MODEL = ".json"
 
 def update(modelA:dict,modelB:dict):
 	if KEY_PROPERTY not in modelB:
@@ -124,3 +119,5 @@ def loadModels(path:str) -> dict:
 			print(name,metadata,validate_schema(metadata))
 		
 	return model_json
+
+#print(findModels("C:\\Users\\armad\\Documents\\Projet\\Gluon\\env\\model\\example"))

@@ -27,9 +27,11 @@ Version_history = list(Version_changelog.keys())
 
 Version = "alpha-v0.0.0"
 
-def genUUID(database:dict):
+Uuid = str
+
+def genUUID(existing:set):
 	new_uuid = uuid.uuid4().hex
-	while new_uuid in database:
+	while new_uuid in existing:
 		new_uuid = uuid.uuid4().hex
 	return new_uuid	
 
