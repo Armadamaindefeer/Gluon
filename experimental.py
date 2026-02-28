@@ -2,7 +2,7 @@ import library.object.universe as universe
 import library.cmdUtils.cmdUtils as cutils
 from library.common import legalInfo, Version, info, warn, error, SOURCE, setLoggerInfo, setLoggerError, setLoggerWarn, setLoggerFatal, setLoggerDebug , getSource
 from library.config import loadConfig
-from library.model.loader import loadModels
+from library.model.loader.loader import constructModels
 import sys
 import library.user_interface.command
 
@@ -23,7 +23,7 @@ def main() -> None:
 	info(f"Initializing Gluon-{Version}") #TEXT
 
 	config = loadConfig("./env/config.json")
-	model = loadModels("./env/model/model_error/")
+	model = constructModels("./env/model/example/")
 	warn("Experimental version, proceed with caution") #TEXT
 
 	info("Gluon launch has succeed") #TEXT

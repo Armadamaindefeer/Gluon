@@ -1,14 +1,15 @@
 class Model:
 	def __init__(self) -> None:
-		self.name:str
-		self.alias:list[str]
-		self.filepath:str
-		self.isCategory:bool
-		self.type_name:str
-		self.properties:dict
+		self.name:str = ""
+		self.alias:list[str] = []
+		self.filepath:str = ""
+		self.isCategory:bool = False
+		self.type_name:str = "base"
+		self.parent:list[str] = []
+		self.properties:dict = dict()
 
 class FilledModel:
 	def __init__(self) -> None:
-		self.model:Model
-		self.count:float
-		self.properties:dict
+		self.model:Model = Model()
+		self.count:float = 0
+		self.properties:dict = dict()

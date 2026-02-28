@@ -1,0 +1,10 @@
+KEY_PROPERTY = "properties"
+KEY_PARENT = "parent"
+KEY_TYPE = "type"
+KEY_ALIAS = "alias"
+KEY_VERSI0N = "version"
+KEY_IS_CATEGORY = "isCategory"
+KEY_DIRPATH = "dirpath"
+KEY_FILENAME = "filename"
+CURRENT_VERSION = 0
+FILE_EXT_MODEL = ".json"

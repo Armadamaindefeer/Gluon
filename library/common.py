@@ -183,4 +183,7 @@ class ERROR(enum.IntFlag):
 	NOT_STORED = enum.auto()
 	NOT_A_STORAGE = enum.auto()
 	UNEXPECTED = enum.auto()
-
+	DOES_NOT_EXIST = enum.auto()
+	JSON_DECODER_ERROR = enum.auto()
+	VERSION_OUTDATED = enum.auto()
+	UNKNOWN_VERSION = enum.auto()
