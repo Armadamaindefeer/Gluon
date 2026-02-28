@@ -431,7 +431,7 @@ def _find(input:cutils.InputParameter) -> None:
 
 @Wrapper("save", "save", "Save database to computer storage",needQuantity=0) #TEXT
 def _save(input:cutils.InputParameter) -> None:
-	with open("database.json","wt") as o:
+	with open("./env/database.json","wt") as o:
 		json.dump(RAW_DATABASE(),o,indent="\t",ensure_ascii=False)
 
 @Wrapper("input", f"input {getConfigModel()['defaultInputMethod']['available']}","Edit default input method for selecting object",auto_completion_func=autoCompleteFromList(getConfigModel()['defaultInputMethod']['available'],alwaysShow=True),needQuantity=1) #TEXT
