@@ -4,12 +4,12 @@ from library.common import genUUID, Uuid, ERROR
 
 class Universe:
 	def __init__(self) -> None:
-		self.objects:dict[Uuid,object_type.Object]
+		self.objects:dict[Uuid,object_type.Generic]
 
 	def exist(self,uuid:Uuid) -> bool:
 		return uuid in self.objects
 
-	def register(self,object:object_type.Object) -> Uuid:
+	def register(self,object:object_type.Generic) -> Uuid:
 		object.uuid = genUUID(existing=set(self.objects.keys()))
 		self.objects[object.uuid] = object
 		self.parent = "OMEGA"

@@ -4,7 +4,7 @@ from library.common import Uuid, ERROR
 
 unitSystem = str
 
-class Object:
+class Generic:
 	def __init__(self) -> None:
 		self.uuid:Uuid
 		self.type:str
@@ -29,7 +29,7 @@ class Object:
 	def getSub(self) -> set[Uuid]:
 		return set()
 
-class Storeable(Object):
+class Storeable(Generic):
 	def __init__(self) -> None:
 		super().__init__()
 		self.capacity:int
@@ -52,7 +52,7 @@ class Storage(Storeable):
 	def isEmpty(self) -> bool:
 		return len(self.childs) == 0
 
-	def storeObject(self,object:Object) -> int:
+	def storeObject(self,object:Generic) -> int:
 		if object.parent != "":
 			return ERROR.HAS_PARENT
 		if object.uuid in self.childs:
@@ -67,7 +67,7 @@ class Storage(Storeable):
 		self.childs.add(uuid)
 		return 0
 	
-	def removeChild(self,object:Object) -> int:
+	def removeChild(self,object:Generic) -> int:
 		if object.uuid not in self.childs:
 			return ERROR.NOT_STORED
 		
