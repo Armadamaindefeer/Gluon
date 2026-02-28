@@ -1,4 +1,4 @@
-import library.object as object
+import library.object.universe as universe
 import library.cmdUtils.cmdUtils as cutils
 from library.common import legalInfo, Version, info, warn, error, SOURCE, setLoggerInfo, setLoggerError, setLoggerWarn, setLoggerFatal, setLoggerDebug , getSource
 from library.config import loadConfig
@@ -18,7 +18,7 @@ def main() -> None:
 	setLoggerFatal(lambda text: cutils.fatal(text,getSource()))
 	setLoggerDebug(lambda text: cutils.debug(text,getSource()))
 
-	Omega = object.Universe()
+	Omega = universe.Universe()
 
 	info(f"Initializing Gluon-{Version}") #TEXT
 
