@@ -17,6 +17,7 @@ def make_object(model:FilledModel) -> Generic:
 
 	__new.count = model.count
 	__new.properties = model.properties
+	__new.model = model.model
 	return __new
 
 def make_copy(object:Generic) -> FilledModel:
