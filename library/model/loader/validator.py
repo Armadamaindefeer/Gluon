@@ -25,18 +25,44 @@ def validateVersion(jsonData:dict) -> int:
 	return 0
 
 def validateProperties(jsonData:dict) -> int:
+	if KEY_PROPERTY not in jsonData:
+		return 0
+	if type(jsonData[KEY_PROPERTY]) != dict:
+		return ERROR.MALFORMED_PROPERTY
 	return 0
 
 def validateParent(jsonData:dict) -> int:
+	if KEY_PARENT not in jsonData:
+		return 0
+	if type(jsonData[KEY_PARENT]) != list:
+		return ERROR.MALFORMED_PARENT
+	for parent in jsonData[KEY_PARENT]:
+		if type(parent) != str:
+			return ERROR.MALFORMED_PARENT
 	return 0
 
 def validateType(jsonData:dict) -> int:
+	if KEY_TYPE not in jsonData:
+		return 0
+	if type(jsonData[KEY_TYPE]) != str:
+		return ERROR.MALFORMED_TYPE
 	return 0
 
 def validateAlias(jsonData:dict) -> int:
+	if KEY_ALIAS not in jsonData:
+		return 0
+	if type(jsonData[KEY_ALIAS]) != list:
+		return ERROR.MALFORMED_ALIAS
+	for alias in jsonData[KEY_ALIAS]:
+		if type(alias) != str:
+			return ERROR.MALFORMED_ALIAS
 	return 0
 
 def validateCategory(jsonData:dict) -> int:
+	if KEY_IS_CATEGORY not in jsonData:
+		return 0
+	if type(jsonData[KEY_IS_CATEGORY]) != bool:
+		return ERROR.MALFORMED_ISCATEGORY
 	return 0
 
 def validateModel(filepath) -> tuple[int,dict]:
