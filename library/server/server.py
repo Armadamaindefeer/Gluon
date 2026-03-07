@@ -1,4 +1,5 @@
 from library.object.universe import Universe
+from library.model.type import Model
 from library.common import info, error, warn, debug, fatal
 from library.config import loadConfig
 from library.model.loader.loader import constructModels
@@ -11,7 +12,7 @@ class Server:
 		self.Database_path = ""
 		self.Config = dict()	
 		self.Config_path = ""
-		self.Model_library = dict()
+		self.Model_library:dict[str,Model] = dict()
 		self.Model_library_path = ""
 		self.Initialized = False
 	
