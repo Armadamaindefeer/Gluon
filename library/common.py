@@ -178,6 +178,8 @@ def jsonErrorSystem(errorMsg,path):
 	error(f"in ({path}) at [{errorMsg.lineno},{errorMsg.colno}] : {errorMsg.msg}")
 
 class ERROR(enum.IntFlag):
+	MODIFIYING_UNIVERSE		= enum.auto()
+	CREATING_UNIVERSE		= enum.auto()
 	HAS_PARENT				= enum.auto()
 	ALREADY_STORED			= enum.auto()
 	NOT_STORED				= enum.auto()

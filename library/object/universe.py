@@ -2,24 +2,32 @@ from library.object import type as object_type, factory as object_factory
 from library.model import type as model_type
 from library.common import genUUID, Uuid, ERROR
 
-class Universe:
+class Universe(object_type.Storage):
 	def __init__(self) -> None:
-		self.objects:dict[Uuid,object_type.Generic]
+		super().__init__()
+		self.model = model_type.Universe
+		self.uuid = "0"
+		self.objects:dict[Uuid,object_type.Generic] = {self.uuid : self}
 
 	def exist(self,uuid:Uuid) -> bool:
 		return uuid in self.objects
 
-	def register(self,object:object_type.Generic) -> Uuid:
+	def register(self,object:object_type.Generic) -> int:
+		if isinstance(object,self.__class__):
+			return ERROR.CREATING_UNIVERSE
 		object.uuid = genUUID(existing=set(self.objects.keys()))
 		self.objects[object.uuid] = object
-		self.parent = "OMEGA"
-		return object.uuid
+		self.parent = object_type.UUID_ROOT
+		self.childs.add(object.uuid)
+		return 0
 
-	def create(self,model:model_type.FilledModel) -> Uuid:
+	def create(self,model:model_type.FilledModel) -> int:
 		return self.register(object_factory.make_object(model))
 	
 	def destroy(self,objectUUID:Uuid,destroyChildren:bool = False) -> int:
 		object_object = self.objects[objectUUID]
+		if isinstance(object_object,self.__class__):
+			return ERROR.MODIFIYING_UNIVERSE
 
 		if isinstance(object_object,object_type.Storage):
 			if not destroyChildren:
@@ -39,6 +47,8 @@ class Universe:
 	def storeObject(self,objectUUID:Uuid,storageUUID:Uuid) -> int:
 		object_object = self.objects[objectUUID]
 		storage_object = self.objects[storageUUID]
+		if isinstance(object_object,self.__class__):
+			return ERROR.MODIFIYING_UNIVERSE
 
 		if not isinstance(storage_object,object_type.Storeable):
 			return ERROR.NOT_A_STORAGE
@@ -53,7 +63,7 @@ class Universe:
 		if isinstance(storage_object,object_type.Storage):
 			if objectUUID in storage_object.childs:
 				return ERROR.ALREADY_STORED
-			object_object.move("")
+			object_object.move(object_type.UUID_ROOT)
 			return storage_object.storeObject(object_object)
 
 		return ERROR.UNEXPECTED
@@ -61,6 +71,8 @@ class Universe:
 	def unstoreObject(self,objectUUID:Uuid,storageUUID:Uuid) -> int:
 		object_object = self.objects[objectUUID]
 		storage_object = self.objects[storageUUID]
+		if isinstance(object_object,self.__class__):
+			return ERROR.MODIFIYING_UNIVERSE
 
 		if not isinstance(storage_object,object_type.Storage):
 			return ERROR.NOT_A_STORAGE
@@ -73,6 +85,8 @@ class Universe:
 		object_object = self.objects[objectUUID]
 		from_object = self.objects[fromUUID]
 		to_object = self.objects[toUUID]
+		if isinstance(object_object,self.__class__):
+			return ERROR.MODIFIYING_UNIVERSE
 
 		if not isinstance(from_object,object_type.Storage):
 			return ERROR.NOT_A_STORAGE

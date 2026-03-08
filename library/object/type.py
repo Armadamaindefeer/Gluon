@@ -3,6 +3,7 @@ from library.model.type import Model
 from library.common import Uuid, ERROR
 
 unitSystem = str
+UUID_ROOT = "0"
 
 class Generic:
 	def __init__(self) -> None:
@@ -53,7 +54,7 @@ class Storage(Storeable):
 		return len(self.childs) == 0
 
 	def storeObject(self,object:Generic) -> int:
-		if object.parent != "":
+		if object.parent != UUID_ROOT:
 			return ERROR.HAS_PARENT
 		if object.uuid in self.childs:
 			return ERROR.ALREADY_STORED
@@ -72,7 +73,7 @@ class Storage(Storeable):
 			return ERROR.NOT_STORED
 		
 		self.childs.remove(object.uuid)
-		object.parent = ""
+		object.parent = UUID_ROOT
 		return 0
 
 	def removeChildUUID(self,uuid:Uuid) -> int:
