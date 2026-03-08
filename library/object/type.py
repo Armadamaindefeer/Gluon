@@ -6,12 +6,12 @@ unitSystem = str
 
 class Generic:
 	def __init__(self) -> None:
-		self.uuid:Uuid
-		self.type:str
-		self.parent:Uuid
-		self.properties:dict
-		self.count:float
-		self.model:Model
+		self.uuid:Uuid = Uuid()
+		self.type:str = ""
+		self.parent:Uuid = ""
+		self.properties:dict = dict()
+		self.count:float = 0
+		self.model:Model = Model()
 
 	def decrease(self,count:float) -> float:
 		if count > 0:
@@ -32,7 +32,7 @@ class Generic:
 class Storeable(Generic):
 	def __init__(self) -> None:
 		super().__init__()
-		self.capacity:int
+		self.capacity:int = 0
 
 	def isEmpty(self) -> bool:
 		return True
@@ -40,7 +40,7 @@ class Storeable(Generic):
 class Storage(Storeable):
 	def __init__(self) -> None:
 		super().__init__()
-		self.childs:set[Uuid]
+		self.childs:set[Uuid] = set()
 		self.count = 1
 
 	def decrease(self) -> float:
