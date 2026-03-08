@@ -6,10 +6,10 @@ def make_object(model:FilledModel) -> Generic:
 	__new = None
 
 	match(model.model.type_name):
-		case "storage":
+		case "Storage":
 			__new = Storeable()
 
-		case "basic":
+		case "Basic":
 			__new = Generic()
 
 		case _:
