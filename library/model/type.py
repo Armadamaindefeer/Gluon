@@ -13,3 +13,7 @@ class FilledModel:
 		self.model:Model = Model()
 		self.count:float = 0
 		self.properties:dict = dict()
+
+Universe = Model()
+Universe.name = "Universe"
+
