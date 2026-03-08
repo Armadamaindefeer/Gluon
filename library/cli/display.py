@@ -10,11 +10,11 @@ def text_short_generic(object:object_type.Generic):
 def print_short_generic(object:object_type.Generic):
 	print(text_short_generic(object))
 
-
 def text_short_storage(object:object_type.Storage):
 	text = f"<{object.model.name}> : {len(object.childs)} different stored object"
 	if "name" in object.properties:
 		text = f"{object.properties['name']} <{object.model.name}> : {len(object.childs)} different stored object"
+	return text
 
 def print_short_storage(object:object_type.Storage):
 	print(text_short_storage(object))
@@ -26,6 +26,7 @@ def text_short(object:object_type.Generic):
 		return text_short_generic(object)
 	elif isinstance(object,object_type.Generic):
 		return text_short_generic(object)
+
 
 def print_short(object:object_type.Generic):
 	print(text_short(object))
