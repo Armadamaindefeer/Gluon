@@ -184,6 +184,9 @@ class ERROR(enum.IntFlag):
 	ALREADY_STORED			= enum.auto()
 	NOT_STORED				= enum.auto()
 	NOT_A_STORAGE			= enum.auto()
+	NOT_EMPTY				= enum.auto()
+	STACKED_STORAGE			= enum.auto()
+	SAME_OBJECT				= enum.auto()
 	UNEXPECTED				= enum.auto()
 	DOES_NOT_EXIST			= enum.auto()
 	JSON_DECODER_ERROR		= enum.auto()
@@ -194,3 +197,4 @@ class ERROR(enum.IntFlag):
 	MALFORMED_PROPERTY		= enum.auto()
 	MALFORMED_ALIAS			= enum.auto()
 	MALFORMED_ISCATEGORY	= enum.auto()
+	

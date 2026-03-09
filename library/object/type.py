@@ -1,6 +1,8 @@
 import math
 from library.model.type import Model
 from library.common import Uuid, ERROR
+from copy import copy, deepcopy
+from typing import Self
 
 unitSystem = str
 UUID_ROOT = "0"
@@ -14,74 +16,79 @@ class Generic:
 		self.count:float = 0
 		self.model:Model = Model()
 
-	def decrease(self,count:float) -> float:
+
+	def decrease(self,count:float) -> int:
 		if count > 0:
 			self.count -= math.trunc(count)
-		return self.count
+		return 0
 
-	def increase(self,count:float) -> float:
+	def increase(self,count:float) -> int:
 		if count > 0:
 			self.count += math.trunc(count)
-		return self.count 
+		return 0
 
-	def move(self,toUuid:Uuid):
+	def move_to(self,toUuid:Uuid):
 		self.parent = toUuid
+	
+	def copy(self) -> Self:
+		__new = self.__class__()
+		__new.uuid = UUID_ROOT
+		__new.type = copy(self.type)
+		__new.count = copy(self.count)
+		__new.parent = copy(self.parent)
+		__new.properties = deepcopy(self.properties)
+		__new.model = copy(self.model)
+		return __new
 
-	def getSub(self) -> set[Uuid]:
-		return set()
-
-class Storeable(Generic):
+class Storage(Generic):
 	def __init__(self) -> None:
 		super().__init__()
-		self.capacity:int = 0
-
-	def isEmpty(self) -> bool:
-		return True
-
-class Storage(Storeable):
-	def __init__(self) -> None:
-		super().__init__()
-		self.childs:set[Uuid] = set()
-		self.count = 1
-
-	def decrease(self) -> float:
-		return 1
-
-	def increase(self) -> float:
-		return 1
+		self.childs:list[Uuid] = []
 
 	def isEmpty(self) -> bool:
 		return len(self.childs) == 0
 
+	def decrease(self, count:float) -> int:
+		if self.isEmpty():
+			return super().decrease(count)
+		else:
+			return ERROR.NOT_EMPTY
+
+	def increase(self, count:float) -> float:
+		if self.isEmpty():
+			return super().increase(count)
+		else:
+			return ERROR.NOT_EMPTY
+
 	def storeObject(self,object:Generic) -> int:
 		if object.parent != UUID_ROOT:
 			return ERROR.HAS_PARENT
-		if object.uuid in self.childs:
-			return ERROR.ALREADY_STORED
-		self.childs.add(object.uuid)
-		object.parent = self.uuid
+		if (res := self.storeObjectUUID(object.uuid)) !=0:
+			return res
+		object.move_to(self.uuid)
 		return 0
 
 	def storeObjectUUID(self,uuid:Uuid) -> int:
 		if uuid in self.childs:
 			return ERROR.ALREADY_STORED
-		self.childs.add(uuid)
+		if self.count > 1:
+			return ERROR.STACKED_STORAGE
+		self.childs.append(uuid)
 		return 0
 	
 	def removeChild(self,object:Generic) -> int:
-		if object.uuid not in self.childs:
-			return ERROR.NOT_STORED
-		
-		self.childs.remove(object.uuid)
-		object.parent = UUID_ROOT
+		if (res := self.removeChildUUID(object.uuid)) != 0:
+			return res
+		object.move_to(UUID_ROOT)
 		return 0
 
 	def removeChildUUID(self,uuid:Uuid) -> int:
 		if uuid not in self.childs:
 			return ERROR.NOT_STORED
-		
 		self.childs.remove(uuid)
 		return 0
 
-	def getSub(self) -> set[Uuid]:
-		return self.childs
+	def copy(self) -> Self:
+		__new = super().copy()
+		__new.childs = []
+		return __new
