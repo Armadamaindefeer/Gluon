@@ -6,98 +6,101 @@ class Universe(object_type.Storage):
 	def __init__(self) -> None:
 		super().__init__()
 		self.model = model_type.Universe
-		self.uuid = "0"
+		self.uuid = object_type.UUID_ROOT
 		self.objects:dict[Uuid,object_type.Generic] = {self.uuid : self}
+
+	def isEmpty(self) -> bool:
+		return False
+
+	def decrease(self, count: float) -> int:
+		return ERROR.MODIFIYING_UNIVERSE
+
+	def increase(self, count: float) -> int:
+		return ERROR.MODIFIYING_UNIVERSE
 
 	def exist(self,uuid:Uuid) -> bool:
 		return uuid in self.objects
 
-	def register(self,object:object_type.Generic) -> int:
-		if isinstance(object,self.__class__):
-			return ERROR.CREATING_UNIVERSE
+	def create(self,model:model_type.FilledModel,storage:Uuid=object_type.UUID_ROOT) -> Uuid:
+		object = object_factory.make_object(model)
 		object.uuid = genUUID(existing=set(self.objects.keys()))
-		self.objects[object.uuid] = object
-		self.parent = object_type.UUID_ROOT
-		self.childs.add(object.uuid)
-		return 0
+		self.objects[object.uuid] = object 
+		self.store(object)
+		if storage != object_type.UUID_ROOT:
+			self.storeObject(object.uuid,storage)
+		return object.uuid
 
-	def create(self,model:model_type.FilledModel) -> int:
-		return self.register(object_factory.make_object(model))
-	
 	def destroy(self,objectUUID:Uuid,destroyChildren:bool = False) -> int:
-		object_object = self.objects[objectUUID]
-		if isinstance(object_object,self.__class__):
+		if objectUUID == object_type.UUID_ROOT:
 			return ERROR.MODIFIYING_UNIVERSE
 
-		if isinstance(object_object,object_type.Storage):
-			if not destroyChildren:
-				for child in object_object.childs:
-					self.objects[child].parent = object_object.parent
-			elif destroyChildren:
-				for child in object_object.childs:
+		object_ = self.objects[objectUUID]
+
+		if isinstance(object_,object_type.Storage):
+			if destroyChildren:
+				for child in object_.childs:
 					self.destroy(child,destroyChildren)
+			else:
+				for child in object_.childs:
+					self.objects[child].parent = object_.parent
 
-		parent_object = self.objects[object_object.parent]
-		if isinstance(parent_object,object_type.Storage):
-			parent_object.childs.remove(objectUUID)
+		parent_ = self.objects[object_.parent]
+		if isinstance(parent_,object_type.Storage):
+			parent_.childs.remove(objectUUID)
+
 		self.objects.pop(objectUUID)
-
 		return 0
 
-	def storeObject(self,objectUUID:Uuid,storageUUID:Uuid) -> int:
-		object_object = self.objects[objectUUID]
-		storage_object = self.objects[storageUUID]
-		if isinstance(object_object,self.__class__):
+	def storeObject(self,object:Uuid,storage:Uuid) -> int:
+		object_ = self.objects[object] # Object may not exist
+		storage_ = self.objects[storage] # Object may not exist
+		if object == storage:
+			return ERROR.SAME_OBJECT
+
+		if isinstance(object_,self.__class__):
 			return ERROR.MODIFIYING_UNIVERSE
 
-		if not isinstance(storage_object,object_type.Storeable):
+		if not isinstance(storage_,object_type.Storage):
 			return ERROR.NOT_A_STORAGE
 
-		if isinstance(storage_object,object_type.Storeable):
-			if storage_object.count > 1:
-				__new_storage_object = object_factory.make_storage(storage_object)
-				self.register(__new_storage_object)
-				storage_object.decrease(1)
-				storage_object = __new_storage_object
+		#Storage is considered empty
+		if storage_.count > 1:
+			storage_filledModel = object_factory.make_filledModel(storage_)
+			storage_filledModel.count -= 1
+			storage_.count = 1
+			self.create(storage_filledModel)
 
-		if isinstance(storage_object,object_type.Storage):
-			if objectUUID in storage_object.childs:
-				return ERROR.ALREADY_STORED
-			object_object.move(object_type.UUID_ROOT)
-			return storage_object.storeObject(object_object)
+		self.unstore(object_)
+		return storage_.store(object_)
 
-		return ERROR.UNEXPECTED
-
-	def unstoreObject(self,objectUUID:Uuid,storageUUID:Uuid) -> int:
-		object_object = self.objects[objectUUID]
-		storage_object = self.objects[storageUUID]
-		if isinstance(object_object,self.__class__):
+	def unstoreObject(self,object:Uuid) -> int:
+		object_ = self.objects[object]
+		storage_ = self.objects[object_.parent]
+		if isinstance(object_,self.__class__):
 			return ERROR.MODIFIYING_UNIVERSE
 
-		if not isinstance(storage_object,object_type.Storage):
+		if not isinstance(storage_,object_type.Storage):
 			return ERROR.NOT_A_STORAGE
-		elif isinstance(storage_object,object_type.Storage):
-			return storage_object.removeChild(object_object)
 
-		return ERROR.UNEXPECTED
+		return storage_.unstore(object_)
 
-	def moveObject(self,objectUUID:Uuid,fromUUID:Uuid,toUUID:Uuid) -> int:
-		object_object = self.objects[objectUUID]
-		from_object = self.objects[fromUUID]
-		to_object = self.objects[toUUID]
-		if isinstance(object_object,self.__class__):
+	def moveObject(self,object:Uuid,to:Uuid) -> int:
+		object_ = self.objects[object]
+		from_ = self.objects[object_.parent]
+		to_ = self.objects[to]
+		if isinstance(object_,self.__class__):
 			return ERROR.MODIFIYING_UNIVERSE
 
-		if not isinstance(from_object,object_type.Storage):
+		if not isinstance(from_,object_type.Storage):
 			return ERROR.NOT_A_STORAGE
 		
-		if not isinstance(to_object,object_type.Storeable):
+		if not isinstance(to_,object_type.Storage):
 			return ERROR.NOT_A_STORAGE
 
-		if objectUUID not in from_object.childs:
+		if object not in from_.childs:
 			return ERROR.NOT_STORED
 
-		if (res := self.unstoreObject(objectUUID,fromUUID)) != 0:
+		if (res := self.unstoreObject(object)) != 0:
 			return res
-
-		return self.storeObject(objectUUID,toUUID)
+		
+		return self.storeObject(object,to)

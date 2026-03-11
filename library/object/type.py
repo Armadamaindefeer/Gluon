@@ -10,8 +10,8 @@ UUID_ROOT = "0"
 class Generic:
 	def __init__(self) -> None:
 		self.uuid:Uuid = Uuid()
-		self.type:str = ""
-		self.parent:Uuid = ""
+		self.type:str = "basic"
+		self.parent:Uuid = UUID_ROOT
 		self.properties:dict = dict()
 		self.count:float = 0
 		self.model:Model = Model()
@@ -54,21 +54,21 @@ class Storage(Generic):
 		else:
 			return ERROR.NOT_EMPTY
 
-	def increase(self, count:float) -> float:
+	def increase(self, count:float) -> int:
 		if self.isEmpty():
 			return super().increase(count)
 		else:
 			return ERROR.NOT_EMPTY
 
-	def storeObject(self,object:Generic) -> int:
+	def store(self,object:Generic) -> int:
 		if object.parent != UUID_ROOT:
 			return ERROR.HAS_PARENT
-		if (res := self.storeObjectUUID(object.uuid)) !=0:
+		if (res := self.storeUUID(object.uuid)) !=0:
 			return res
 		object.move_to(self.uuid)
 		return 0
 
-	def storeObjectUUID(self,uuid:Uuid) -> int:
+	def storeUUID(self,uuid:Uuid) -> int:
 		if uuid in self.childs:
 			return ERROR.ALREADY_STORED
 		if self.count > 1:
@@ -76,13 +76,13 @@ class Storage(Generic):
 		self.childs.append(uuid)
 		return 0
 	
-	def removeChild(self,object:Generic) -> int:
-		if (res := self.removeChildUUID(object.uuid)) != 0:
+	def unstore(self,object:Generic) -> int:
+		if (res := self.unstoreUuid(object.uuid)) != 0:
 			return res
 		object.move_to(UUID_ROOT)
 		return 0
 
-	def removeChildUUID(self,uuid:Uuid) -> int:
+	def unstoreUuid(self,uuid:Uuid) -> int:
 		if uuid not in self.childs:
 			return ERROR.NOT_STORED
 		self.childs.remove(uuid)
