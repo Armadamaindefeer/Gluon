@@ -1,13 +1,13 @@
 from library.model.type import FilledModel
-from library.object.type import Generic, Storage, Storeable
-
+from library.object.type import Generic, Storage
+from copy import copy
 
 def make_object(model:FilledModel) -> Generic:
 	__new = None
 
 	match(model.model.type_name):
 		case "Storage":
-			__new = Storeable()
+			__new = Storage()
 
 		case "Basic":
 			__new = Generic()
@@ -20,17 +20,9 @@ def make_object(model:FilledModel) -> Generic:
 	__new.model = model.model
 	return __new
 
-def make_copy(object:Generic) -> FilledModel:
+def make_filledModel(object:Generic):
 	__new = FilledModel()
-	__new.model = object.model
-	__new.properties = object.properties
-	__new.count = object.count
+	__new.count = copy(object.count)
+	__new.model = copy(object.model)
+	__new.properties = copy(object.properties)
 	return __new
-
-def make_storage(storeable_object:Storeable) -> Storage:
-	new_storage = Storage()
-	new_storage.type = storeable_object.type
-	new_storage.capacity = storeable_object.capacity
-	new_storage.properties = storeable_object.properties
-	new_storage.count = 1
-	return new_storage
