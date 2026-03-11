@@ -22,8 +22,6 @@ def print_short_storage(object:object_type.Storage):
 def text_short(object:object_type.Generic):
 	if isinstance(object,object_type.Storage):
 		return text_short_storage(object)
-	elif isinstance(object,object_type.Storeable):
-		return text_short_generic(object)
 	elif isinstance(object,object_type.Generic):
 		return text_short_generic(object)
 
