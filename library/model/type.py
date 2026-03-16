@@ -4,7 +4,7 @@ class Model:
 		self.alias:list[str] = []
 		self.filepath:str = ""
 		self.isCategory:bool = False
-		self.type_name:str = "base"
+		self.type_name:str = "Basic"
 		self.parent:list[str] = []
 		self.properties:dict = dict()
 
