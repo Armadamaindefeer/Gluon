@@ -4,13 +4,24 @@ import library.cmdUtils.cmdUtils as cutils
 from library.common import debug,info, warn, error, fatal
 from library.common import setLoggerInfo, setLoggerError, setLoggerWarn, setLoggerFatal, setLoggerDebug 
 from library.common import legalInfo, Version, SOURCE, getSource
-from library.object.type import Uuid
+from library.object.type import UUID_ROOT, Storage, Uuid
+from library.model.type import FilledModel
+from library.cli.utils import getCount, getProperty
+from library.cli.display import print_short, printObject, text_short
+import library.cli.command
+from enum import IntFlag, auto
 
 class App:
 		
 	def __init__(self,config_path:str,database_path:str,model_library_path:str)-> None:
 		self.CmdHandler = cutils.CmdHandler(SOURCE)
 		self.Server = Server()
+
+		self.selected_list:list[Uuid] = []
+		self.selected_key:set[Uuid] = set()
+
+		self.current_object:Uuid = UUID_ROOT
+
 		legalInfo()
 
 		setLoggerInfo(lambda text: cutils.info(text,getSource()))
@@ -23,122 +34,163 @@ class App:
 		warn("Experimental version, proceed with caution") #TEXT
 
 		Register(
+			"help",
+			"help command",
+			"Show help about a command",
+			optional=1
+		)(self.cmd_help)
+
+		self.CmdHandler.add_command(CommandDir(
 			"reload",
-			"reload (*|all|config|model|database)",
-			"desc",
-			optional=1
-		)(self.reload)
+			{
+				"*" : Command("*",self.cmd_reload_all),
+				"all" : Command("all",self.cmd_reload_all),
+				"config" : Command("config",self.cmd_reload_config),
+				"database" : Command("database",self.cmd_reload_database),
+				"model" : Command("model",self.cmd_reload_model)
+			},
+			"reload (*|all|config|database|model)",
+			defaultHandler = Command("reload",self.cmd_reload_all)
+		))
 
-		Register(
-			"start",
-			"start",
-			"start the Gluon server",
-		)(self.start)
+		# Register(
+		# 	"start",
+		# 	"start",
+		# 	"start the Gluon server",
+		# )(self.cmd_start)
 
-		Register(
-			"stop",
-			"stop",
-			"stop the Gluon server",
-		)(self.stop)
-
-		Register(
-			"show",
-			"show (uuid)",
-			"Show current storage location",
-			optional=1
-		)(self.show)
+		# Register(
+		# 	"stop",
+		# 	"stop",
+		# 	"stop the Gluon server",
+		# )(self.cmd_stop)
 
 		Register(
 			"new",
-			"new model_name",
+			"new model_name (storage:id)",
 			"Create a new object",
-			mandatory=1
-		)(self.new)
-
-		Register(
-			"move",
-			"move selectedId ...",
-			"move selected object into current context",
 			mandatory=1,
-			optional=-1
-		)(self.move)
-
-		Register(
-			"select",
-			"select localId ...",
-			"select one or more object for later use (remain after context change)",
-			mandatory=1,
-			optional=-1
-		)(self.select)
-
-		Register(
-			"unselect",
-			"unselect (selectedId ...)",
-			"unselect one or more object",
-			optional=-1
-		)(self.unselect)
+			optional=1
+		)(self.cmd_new)
 
 		self.CmdHandler.add_command(CommandDir(
 			"model",
 			{
-				"new" : Command("new",self.model_new),
-				"list": Command("list",self.model_list)				
+				#"new" : Command("new",self.model_new),
+				"list": Command("list",self.cmd_model_list)				
 			}
 		))
 
 		self.CmdHandler.add_command(CommandDir(
+			"show",
+			{
+				"selected" : Command("selected",self.cmd_show_selected),
+			},
+			"show (id|selected) ..."
+			"show current context or selected objetcs",
+			defaultHandler= Command("show",self.cmd_show,optional=1)
+		))
+
+		Register(
+			"select",
+			"select localId|*",
+			"Select an object in current context",
+			mandatory=1,
+		)(self.cmd_select)
+
+		Register(
+			"unselect",
+			"unselect selectedId|*",
+			"Unselect an object in current context",
+			mandatory=1,
+		)(self.cmd_unselect)
+
+		self.CmdHandler.add_command(CommandDir(
 			"go",
 			{
-				"to" : Command("to",self.go_to,mandatory=1),
-				"back" : Command("back",self.go_back,optional=1)
-			},
-			"go <to|back> (uuid)",
-			"Allow to move inside the universe"
+				"to" : Command("to",self.cmd_go_to,mandatory=1),
+				"back" : Command("back",self.cmd_go_back)
+			}
 		))
 
 		Register(
 			"destroy",
-			"destroy localId ...",
+			"destroy id",
 			"destroy an object",
 			mandatory=1,
-			optional=-1
-		)(self.destroy)
+		)(self.cmd_destroy)
+
+		Register(
+			"decrease",
+			"decrease id amount",
+			"Decrease an object count based on provided amount",
+			mandatory=2
+		)(self.cmd_decrease)
+
+		Register(
+			"increase",
+			"increase id amount",
+			"Increase an object count based on provided amount",
+			mandatory=2
+		)(self.cmd_increase)
+
+		Register(
+			"save",
+			"save (path)",
+			"Save database to path or default value",
+			optional=1,
+		)(self.cmd_save)
 
 		self.CmdHandler.add_multiple_command(globalCommands)
 		self.Server.start(config_path,database_path,model_library_path)
 
-		self.selected:list[Uuid] = []
-		self.context:Uuid = Uuid()
-
 		info("Gluon server has successfuly been initialized") #TEXT
 		info(f"Welcome {self.Server.Config['username']}") #TEXT
 
+	class ERROR(IntFlag):
+		INVALID_ARGUMENT = auto()
+		INVALID_LOCAL_INDEX = auto()
+		INVALID_SELECTED_INDEX = auto()
+		INVALID_UUID = auto()
+		UNEXPECTED = auto()
 
-	def reload(self, shell:Shell):
-		if len(shell.input) == 0:
-			self.Server.loadConfig(self.Server.Config_path) 
-			self.Server.loadDatabase(self.Server.Database_path)
-			self.Server.loadModels(self.Server.Model_library_path)
-		else:
-			match shell.input[0]:
-				case "all"|"*":
-					info(f"Reloading everything")
-					self.Server.loadConfig(self.Server.Config_path) 
-					self.Server.loadDatabase(self.Server.Database_path)
-					self.Server.loadModels(self.Server.Model_library_path)
-				case "database":
-					info(f"Reloading database")
-					self.Server.loadDatabase(self.Server.Database_path)
-				case "config":
-					info(f"Reloading config")
-					self.Server.loadConfig(self.Server.Config_path) 
-				case "model":
-					info(f"Reloading model library")
-					self.Server.loadModels(self.Server.Model_library_path)
-				case _:
-					error(f"Unrecognised argument \'{shell.input[0]}\'")
+	def cmd_help(self,input:Shell) -> None:
+		if len(input) == 0:
+			for command in self.CmdHandler.cmd_list.values():
+				info("- " + command.syntax)
+				info("\t" + command.desc)
+				info("\tusage : "+ command.usage)
 
-	def start(self, shell: Shell):
+		if len(input) == 1:
+			for command in globalCommands:
+				if input[0] == command.syntax:
+					info("- " + command.syntax)
+					info("\t" + command.desc)
+					info("\tusage : "+ command.usage)
+					break
+			else:
+				error(f"Unrecognised commande : '{input[0]}'")
+				return
+
+	def cmd_reload_all(self, shell:Shell):
+		info(f"Reloading everything")
+		self.Server.loadConfig(self.Server.Config_path) 
+		self.Server.loadDatabase(self.Server.Database_path)
+		self.Server.loadModels(self.Server.Model_library_path)
+
+	def cmd_reload_database(self, shell:Shell):
+		info(f"Reloading database")
+		self.Server.loadDatabase(self.Server.Database_path)
+
+	def cmd_reload_config(self, shell:Shell):
+		info(f"Reloading config")
+		self.Server.loadConfig(self.Server.Config_path) 
+
+	def cmd_reload_model(self, shell:Shell):
+		info(f"Reloading model library")
+		self.Server.loadModels(self.Server.Model_library_path)
+
+	def cmd_start(self, shell: Shell):
 		if not self.Server.Initialized:
 			self.Server.start(
 				self.Server.Config_path,
@@ -148,39 +200,242 @@ class App:
 		else:
 			warn("Server already started")
 
-	def stop(self, shell : Shell):
+	def cmd_stop(self, shell : Shell):
 		warn("NYI")
 
-	def new(self,shell: Shell):
-		if shell[0] not in self.Server.Model_library:
+	def index(self,index_str:str) -> tuple[int,Uuid]:
+		PREFIX_SELECTED = "$"
+		PREFIX_UUID = "@"
+
+		if index_str.startswith(PREFIX_SELECTED):
+			index_strip = index_str.removeprefix(PREFIX_SELECTED)
+			if not index_strip.isdigit():
+				return App.ERROR.INVALID_ARGUMENT,""
+			if int(index_strip) < 1 or int(index_strip) > len(self.selected_list):
+				return App.ERROR.INVALID_SELECTED_INDEX,""
+			
+			return 0,self.selected_list[int(index_strip)-1]
+		elif index_str.startswith(PREFIX_UUID):
+			index_strip = index_str.removeprefix(PREFIX_UUID)
+			if index_strip not in self.Server.Database.objects:
+				return App.ERROR.INVALID_UUID,""
+			return 0,index_strip
+		else:
+			if not index_str.isdigit():
+				return App.ERROR.INVALID_ARGUMENT,""
+			current_ = self.Server.Database.objects[self.current_object]
+			if isinstance(current_,Storage):
+				if int(index_str) < 1 or int(index_str) > len(current_.childs):
+					return App.ERROR.INVALID_LOCAL_INDEX,""
+			
+				return 0,current_.childs[int(index_str)-1]
+			return App.ERROR.UNEXPECTED,""
+
+	def cmd_new(self,shell: Shell):
+		
+		model = self.Server.Model_library.get(shell[0])
+		if model == None:
 			error(f"Unrecognised model name : '{shell[0]}'")
-		warn("WIP")
+			info("Use 'model list' to get available models")
+			return
 
-	def show(self,shell:Shell):
-		warn("NYI")
+		filled = FilledModel()
+		filled.model = model
 
-	def move(self,shell:Shell):
+		filled.count = getCount()
+
+		for property_name,property in model.properties.items():
+			filled.properties[property_name] = getProperty(property_name,property)
+
+		if len(shell) > 1:
+			res, target = self.index(shell[1])
+			if res != 0:
+				error(f"error code {res}")
+				return
+			self.Server.Database.create(filled,target)
+		else:
+			self.Server.Database.create(filled)
+
+	def show_current(self):
+		current_ = self.Server.Database.objects[self.current_object]
+		print_short(current_)	
+		if not isinstance(current_,Storage):
+			error("Current object isn't a storage")	
+			return
+
+		print('Stored objects : ')
+		if len(current_.childs) == 0:
+			print("Nothing to see here...")
+		for i,childUuid in enumerate(current_.childs,start=1):
+			text = text_short(self.Server.Database.objects[childUuid])
+			print(f"[{i}] : {text}")
+
+	def show_uuid(self,uuid:Uuid):
+		object_ = self.Server.Database.objects[uuid]
+		printObject(object_)
+
+	def cmd_show(self, shell:Shell):
+		if len(shell) == 0:
+			self.show_current()
+		elif len(shell) == 1:
+			res, uuid = self.index(shell[0])
+			if res != 0:
+				error(f"error code {res}")
+				return
+			self.show_uuid(uuid)
+
+	def cmd_show_selected(self, shell:Shell):
+		if len(self.selected_list) == 0:
+			info("No object currently selected")
+			return
+		for i,object_uuid in enumerate(self.selected_list,start=1):
+			object = self.Server.Database.objects[object_uuid]
+			print(f"[{i}] : {text_short(object)}")
+
+	def cmd_move(self, shell:Shell):
 		warn("NYI")
 	
-	def select(self, shell:Shell):
+	def select_add(self,*uuidList:Uuid):
+		for uuid in uuidList:
+			if uuid in self.selected_key:
+				continue
+			self.selected_key.add(uuid)
+			self.selected_list.append(uuid)
+			info(f"Selected : {text_short(self.Server.Database.objects[uuid])}")
+
+	def select_remove(self,*uuidIndex:int):
+		for index in uuidIndex:
+			if index > len(self.selected_key):
+				continue
+			if index < 0:
+				continue
+			object_uuid = self.selected_list.pop(index)
+			self.selected_key.remove(object_uuid)
+			object_object = self.Server.Database.objects[object_uuid]
+			info(f"Unselected : {text_short(object_object)}")
+
+	def cmd_select(self, shell:Shell):
+		current_ = self.Server.Database.objects[self.current_object]
+		if not isinstance(current_,Storage):
+			error("Current object isn't a storage")
+			return
+
+		if shell[0] == "*":
+			self.select_add(*current_.childs)
+			return
+
+		res, target = self.index(shell[0])
+		if res != 0:
+			error(f"error code : {res}")
+			return
+		
+		if target in self.selected_key:
+			error("Object already selected")
+			return
+
+		self.select_add(target)			
+
+	def cmd_unselect(self, shell:Shell):
+		if shell[0] == "*":
+			self.select_remove(*range(len(self.selected_list)))
+		if not shell[0].isdigit():
+			error(f"unrecognized argument {shell[0]}")
+			return
+		if int(shell[0]) < 1 or int(shell[0])  > len(self.selected_list):
+			error(f"Invalid selected index {shell[0]}")
+			return
+		
+		self.select_remove(int(shell[0])-1)
+
+	def cmd_model_new(self, shell:Shell):
 		warn("NYI")
 
-	def unselect(self, shell:Shell):
-		warn("NYI")
-
-	def model_new(self, shell:Shell):
-		warn("NYI")
-
-	def model_list(self, shell:Shell):
+	def cmd_model_list(self, shell:Shell):
 		info(f"Currently {len(self.Server.Model_library)} loaded model(s) :")
 		for model_name in self.Server.Model_library:
 			print("\r" +model_name)
 
-	def go_to(self, shell:Shell):
-		warn("NYI")
+	def cmd_go_to(self, shell:Shell):
+		object_ = self.Server.Database.objects[self.current_object]
+		if not isinstance(object_,Storage):
+			error("Current object isn't a storage")	
+			return
 
-	def go_back(self, shell:Shell):
-		warn("NYI")
+		res, target = self.index(shell[0])
+		if res != 0:
+			error(f"error code {res}")
+			return
+		target_ = self.Server.Database.objects[target]
 
-	def destroy(self, shell:Shell):
-		warn("WIP")
+		if not isinstance(target_,Storage):
+			error(f"Target index isn't a storage")
+
+		self.current_object = target
+
+
+	def cmd_go_back(self, shell:Shell):
+		if self.current_object == UUID_ROOT:
+			error("Can't go past the Universe (yet)")
+			return
+		object_ = self.Server.Database.objects[self.current_object]
+		self.current_object = object_.parent
+
+	def cmd_destroy(self, shell:Shell):
+		res, target = self.index(shell[0])
+		if target == UUID_ROOT:
+			error("Trying to delete the universe")
+			return
+		if target == self.current_object:
+			error("Trying to delete current object")
+			return
+		
+		if(res := self.Server.Database.destroy(target)) != 0:
+			error(f"error code : {res}")
+			return
+
+		if target in self.selected_key:
+			self.selected_list.remove(target)
+			self.selected_key.remove(target)
+
+	def cmd_increase(self,shell:Shell):
+		res, target = self.index(shell[0])
+		if res != 0:
+			error(f"error code {res}")
+			return
+		target_ = self.Server.Database.objects[target]
+		if isinstance(target_,Storage) and not target_.isEmpty():
+			error("Cannot modify quantity of non-empty storage")
+			return
+
+		if not shell[1].isdigit():
+			error(f"Invalid quantity {shell[1]}")
+			return
+		
+		quantity = int(shell[1])
+		target_.increase(quantity)
+
+	def cmd_decrease(self,shell:Shell):
+		res, target = self.index(shell[0])
+		if res != 0:
+			error(f"error code {res}")
+			return
+		target_ = self.Server.Database.objects[target]
+		if isinstance(target_,Storage) and not target_.isEmpty():
+			error("Cannot modify quantity of non-empty storage")
+			return
+
+		if not shell[1].isdigit():
+			error(f"Invalid quantity {shell[1]}")
+			return
+		
+		quantity = int(shell[1])
+		target_.decrease(quantity)
+
+
+
+	def cmd_save(self, shell:Shell):
+		savePath = shell[0] if len(shell) != 0 else self.Server.Config["defaultSavePath"]
+		res = self.Server.saveDatabase(savePath)
+		if res != 0:
+			error(f"error code : {res}")
+		return 		

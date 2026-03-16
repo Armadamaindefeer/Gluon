@@ -197,4 +197,4 @@ class ERROR(enum.IntFlag):
 	MALFORMED_PROPERTY		= enum.auto()
 	MALFORMED_ALIAS			= enum.auto()
 	MALFORMED_ISCATEGORY	= enum.auto()
-	
+	MALFORMED_DATABASE		= enum.auto()

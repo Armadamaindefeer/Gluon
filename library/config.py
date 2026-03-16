@@ -6,6 +6,7 @@ from library.common import jsonErrorSystem
 
 config_scheme = {
 	"username" : {"type" : "string","allowNone": True,"default" : None},
+	"defaultSavePath" : {"type" : "string","allowNone":False,"default":"./env/database.json"}
 }
 
 def save(data,path):

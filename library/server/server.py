@@ -1,10 +1,12 @@
 from library.object.universe import Universe
 from library.model.type import Model
-from library.common import info, error, warn, debug, fatal
+from library.common import info, error, warn, debug, fatal, ERROR
 from library.config import loadConfig
 from library.model.loader.loader import constructModels
+from library.object.factory import make_dict
 
 import sys
+import json
 
 class Server:
 	def __init__(self) -> None:
@@ -25,7 +27,29 @@ class Server:
 		return 0
 
 	def loadDatabase(self,path) -> int:
-		warn(f"Currently, the database isn't loaded from/to disk")
+		warn(f"Currently, the database isn't loaded from disk")
+		data = {}
+		with open(path,"rt",encoding="utf-8") as f:
+			data = json.load(f)
+		if "version" not in data:
+			return ERROR.UNKNOWN_VERSION
+		if data["version"] != 1:
+			return ERROR.UNKNOWN_VERSION
+		if "data" not in data:
+			return ERROR.MALFORMED_DATABASE
+		if type(data["data"]) != dict:
+			return ERROR.MALFORMED_DATABASE
+		return 0
+
+	def saveDatabase(self,save_path) -> int:
+		save_data = {
+			"version" : 1,
+			"data" : {}
+		}
+		for object_ in self.Database.objects.values():
+			save_data["data"][object_.uuid] =  make_dict(object_)[1]
+		with open(save_path,"wt",encoding="utf-8") as o:
+			json.dump(save_data,o,ensure_ascii=False,indent="\t")
 		return 0
 
 	def start(self,config_path:str,database_path:str,model_library_path:str):
