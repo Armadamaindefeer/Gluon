@@ -33,15 +33,8 @@ def print_properties(object:object_type.Generic):
 	if len(object.properties) == 0:
 		return
 	print("Properties:")
-	for properties_name,data in object.properties:
+	for properties_name,data in object.properties.items():
 		print(f"\t {properties_name} : {data}")
-
-def print_stored(object:object_type.Storage):
-	if len(object.childs) == 0:
-		return
-	print("Stored: NYI")
-	for child in object.childs:
-		...
 
 def print_generic(object:object_type.Generic):
 	print_short_generic(object)
@@ -53,4 +46,9 @@ def print_storage(object:object_type.Storage):
 
 
 def printObject(object:object_type.Generic):
-	...
+	if isinstance(object,object_type.Storage):
+		print_storage(object)
+	elif isinstance(object,object_type.Generic):
+		print_generic(object)
+	else:
+		print_generic(object)
