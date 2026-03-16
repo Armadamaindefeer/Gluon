@@ -68,7 +68,7 @@ def validateCategory(jsonData:dict) -> int:
 def validateModel(filepath) -> tuple[int,dict]:
 	content = {}
 	result = 0
-	with open(filepath,"rt") as f:
+	with open(filepath,"rt",encoding="utf-8") as f:
 		try : 
 			content = json.load(f)
 		except json.JSONDecodeError:
