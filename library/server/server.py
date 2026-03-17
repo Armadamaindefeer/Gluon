@@ -63,6 +63,7 @@ class Server:
 			object_.count = object_dict["count"]
 			object_.parent = object_dict["parent"]
 			object_.type = object_dict["type"]
+			object_.uuid = uuid
 			if uuid == object_type.UUID_ROOT:
 				object_.model = model_type.Universe()
 			elif object_dict["model"] not in self.Model_library:
