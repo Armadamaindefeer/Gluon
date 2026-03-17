@@ -13,7 +13,7 @@ def main() -> None:
 			app.CmdHandler.handle_input()
 		except KeyboardInterrupt:
 			if cutils.Validate("Voulez vous quitter ?",SOURCE,enterIsYes=True): #TEXT
-				sys.exit()
+				app.Server.exit(0)
 
 if __name__ == "__main__":
 	main()

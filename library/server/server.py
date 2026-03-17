@@ -84,6 +84,7 @@ class Server:
 		}
 		for object_ in self.Database.objects.values():
 			save_data["data"][object_.uuid] =  make_dict(object_)[1]
+		os.makedirs(os.path.dirname(save_path),exist_ok=True)
 		with open(save_path,"wt",encoding="utf-8") as o:
 			json.dump(save_data,o,ensure_ascii=False,indent="\t")
 		return 0

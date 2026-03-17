@@ -10,7 +10,9 @@ config_scheme = {
 }
 
 def save(data,path):
-	json.dump(data,open(path,"wt"),indent="\t",ensure_ascii=False)
+	os.makedirs(os.path.dirname(path),exist_ok=True)
+	with open(path,"wt",encoding="utf-8") as o:
+		json.dump(data,o,indent="\t",ensure_ascii=False)
 
 def default_and_save(path):
 	out = default_dict(config_scheme)
