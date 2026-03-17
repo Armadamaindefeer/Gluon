@@ -5,7 +5,7 @@ from library.common import genUUID, Uuid, ERROR
 class Universe(object_type.Storage):
 	def __init__(self) -> None:
 		super().__init__()
-		self.model = model_type.Universe
+		self.model = model_type.Universe()
 		self.uuid = object_type.UUID_ROOT
 		self.objects:dict[Uuid,object_type.Generic] = {self.uuid : self}
 
