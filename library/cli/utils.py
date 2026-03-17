@@ -30,7 +30,7 @@ def getProperty(name,datafield:dict):
 
 	if "selectValue" in datafield:
 		selectValue_list = datafield["selectValue"]
-		value =  cutils.Choice(f"Choose a value for {name}","OBJECT_CREATOR",selectValue_list,allowNone)
+		value =  cutils.Choice(f"Choose a value for {name}","OBJECT_CREATOR",selectValue_list)
 		return selectValue_list[value]
 
 	match datafield["type"]:

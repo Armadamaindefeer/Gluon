@@ -1,12 +1,14 @@
 from library.object.universe import Universe
-from library.model.type import Model
+import library.model.type as model_type
 from library.common import info, error, warn, debug, fatal, ERROR
 from library.config import loadConfig
 from library.model.loader.loader import constructModels
 from library.object.factory import make_dict
+import library.object.type as object_type
 
 import sys
 import json
+import os
 
 class Server:
 	def __init__(self) -> None:
@@ -14,7 +16,7 @@ class Server:
 		self.Database_path = ""
 		self.Config = dict()	
 		self.Config_path = ""
-		self.Model_library:dict[str,Model] = dict()
+		self.Model_library:dict[str,model_type.Model] = dict()
 		self.Model_library_path = ""
 		self.Initialized = False
 	
@@ -27,8 +29,9 @@ class Server:
 		return 0
 
 	def loadDatabase(self,path) -> int:
-		warn(f"Currently, the database isn't loaded from disk")
 		data = {}
+		if not os.path.exists(path):
+			return ERROR.UNEXISTANT_FILE
 		with open(path,"rt",encoding="utf-8") as f:
 			data = json.load(f)
 		if "version" not in data:
@@ -39,6 +42,38 @@ class Server:
 			return ERROR.MALFORMED_DATABASE
 		if type(data["data"]) != dict:
 			return ERROR.MALFORMED_DATABASE
+
+		self.Database.objects = {}
+
+		for uuid,object_dict in data["data"].items():
+			if type(uuid) != str:
+				continue
+			if type(object_dict) != dict:
+				continue
+			object_ = None
+			match object_dict["type"]:
+				case "Basic":
+					object_ = object_type.Generic()
+				case "Storage":
+					object_ = object_type.Storage()
+					object_.childs = object_dict["child"]
+				case _:
+					object_ = object_type.Generic()
+			object_.properties = object_dict["properties"]
+			object_.count = object_dict["count"]
+			object_.parent = object_dict["parent"]
+			object_.type = object_dict["type"]
+			if uuid == object_type.UUID_ROOT:
+				object_.model = model_type.Universe()
+			elif object_dict["model"] not in self.Model_library:
+				error_model = model_type.Faulty()
+				error_model.target_model = object_dict["model"]
+				object_.model = error_model
+			else:
+				object_.model = self.Model_library[object_dict["model"]]
+			
+			self.Database.objects[uuid] = object_
+
 		return 0
 
 	def saveDatabase(self,save_path) -> int:
@@ -59,13 +94,17 @@ class Server:
 		if(res := self.loadConfig(config_path)) != 0:
 			fatal(f"Could not load config (code :{res})")
 			self.exit(res)
-		if(res := self.loadDatabase(database_path)) != 0:
-			fatal(f"Could not load database (code : {res})")
-			self.exit(res)
 		if(res := self.loadModels(model_library_path)) != 0:
 			fatal(f"Could not load model library (code : {res})")
 			self.exit(res)
+
+		if os.path.exists(self.Database_path):
+			res = self.loadDatabase(database_path)
+			if res != 0:
+				fatal(f"Could not load database (code : {res})")
+				self.exit(res)			
 		self.Initialized = True
 
 	def exit(self,error_code):
+		self.saveDatabase(save_path=self.Config["defaultSavePath"])
 		sys.exit(error_code)

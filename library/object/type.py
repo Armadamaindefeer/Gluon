@@ -10,7 +10,7 @@ UUID_ROOT = "0"
 class Generic:
 	def __init__(self) -> None:
 		self.uuid:Uuid = Uuid()
-		self.type:str = "basic"
+		self.type:str = "Basic"
 		self.parent:Uuid = UUID_ROOT
 		self.properties:dict = dict()
 		self.count:float = 0
@@ -43,6 +43,7 @@ class Generic:
 class Storage(Generic):
 	def __init__(self) -> None:
 		super().__init__()
+		self.type = "Storage"
 		self.childs:list[Uuid] = []
 
 	def isEmpty(self) -> bool:

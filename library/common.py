@@ -198,3 +198,4 @@ class ERROR(enum.IntFlag):
 	MALFORMED_ALIAS			= enum.auto()
 	MALFORMED_ISCATEGORY	= enum.auto()
 	MALFORMED_DATABASE		= enum.auto()
+	UNEXISTANT_FILE			= enum.auto()
