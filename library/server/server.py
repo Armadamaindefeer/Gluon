@@ -44,8 +44,12 @@ class Server:
 			return ERROR.MALFORMED_DATABASE
 
 		self.Database.objects = {}
+		self.Database.objects[object_type.UUID_ROOT] = self.Database
 
 		for uuid,object_dict in data["data"].items():
+			if uuid == object_type.UUID_ROOT:
+				continue
+
 			if type(uuid) != str:
 				continue
 			if type(object_dict) != dict:
@@ -64,9 +68,8 @@ class Server:
 			object_.parent = object_dict["parent"]
 			object_.type = object_dict["type"]
 			object_.uuid = uuid
-			if uuid == object_type.UUID_ROOT:
-				object_.model = model_type.Universe()
-			elif object_dict["model"] not in self.Model_library:
+
+			if object_dict["model"] not in self.Model_library:
 				error_model = model_type.Faulty()
 				error_model.target_model = object_dict["model"]
 				object_.model = error_model

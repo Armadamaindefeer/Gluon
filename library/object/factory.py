@@ -1,4 +1,4 @@
-from library.model.type import FilledModel, Model
+from library.model.type import FilledModel, Model, Faulty
 from library.object.type import Generic, Storage, Uuid
 from copy import copy, deepcopy
 
@@ -31,7 +31,10 @@ def make_dict_generic(object:Generic) -> tuple[Uuid,dict]:
 	out = {}
 	out["properties"] = deepcopy(object.properties)
 	out["count"] = copy(object.count)
-	out["model"] = copy(object.model.name)
+	if isinstance(object.model,Faulty):
+		out["model"] = copy(object.model.target_model)
+	else:
+		out["model"] = copy(object.model.name)
 	out["parent"] = copy(object.parent)
 	out["type"] = copy(object.type)
 	return object.uuid,out
