@@ -17,15 +17,19 @@ class Generic:
 		self.model:Model = Model()
 
 
-	def decrease(self,count:float) -> int:
-		if count > 0:
-			self.count -= math.trunc(count)
-		return 0
+	def decrease(self,amount:float) -> int:
+		if self.count < amount:
+			return ERROR.OVERCONSUMPTION
+		if amount > 0:
+			self.count -= math.trunc(amount)
+			return 0
+		return ERROR.UNEXPECTED
 
-	def increase(self,count:float) -> int:
-		if count > 0:
-			self.count += math.trunc(count)
-		return 0
+	def increase(self,amount:float) -> int:
+		if amount > 0:
+			self.count += math.trunc(amount)
+			return 0
+		return ERROR.UNEXPECTED
 
 	def move_to(self,toUuid:Uuid):
 		self.parent = toUuid
@@ -49,15 +53,15 @@ class Storage(Generic):
 	def isEmpty(self) -> bool:
 		return len(self.childs) == 0
 
-	def decrease(self, count:float) -> int:
+	def decrease(self, amount:float) -> int:
 		if self.isEmpty():
-			return super().decrease(count)
+			return super().decrease(amount)
 		else:
 			return ERROR.NOT_EMPTY
 
-	def increase(self, count:float) -> int:
+	def increase(self, amount:float) -> int:
 		if self.isEmpty():
-			return super().increase(count)
+			return super().increase(amount)
 		else:
 			return ERROR.NOT_EMPTY
 

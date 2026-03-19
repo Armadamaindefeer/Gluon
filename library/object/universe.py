@@ -12,10 +12,10 @@ class Universe(object_type.Storage):
 	def isEmpty(self) -> bool:
 		return False
 
-	def decrease(self, count: float) -> int:
+	def decrease(self, amount: float) -> int:
 		return ERROR.MODIFIYING_UNIVERSE
 
-	def increase(self, count: float) -> int:
+	def increase(self, amount: float) -> int:
 		return ERROR.MODIFIYING_UNIVERSE
 
 	def exist(self,uuid:Uuid) -> bool:

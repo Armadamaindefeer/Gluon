@@ -199,3 +199,4 @@ class ERROR(enum.IntFlag):
 	MALFORMED_ISCATEGORY	= enum.auto()
 	MALFORMED_DATABASE		= enum.auto()
 	UNEXISTANT_FILE			= enum.auto()
+	OVERCONSUMPTION			= enum.auto()
