@@ -1,6 +1,6 @@
-## Modèles
+# Modèles
 
-Un modèle permet de spécifié des propriété d'un objet. C'est un fichier .JSON dont La structure est la suivante : 
+Un modèle permet de spécifier les propriétés d'un objet. C'est un fichier json dont la structure est la suivante : 
 ```json
 	{
 		"version" : 0,
@@ -11,39 +11,50 @@ Un modèle permet de spécifié des propriété d'un objet. C'est un fichier .JS
 		"properties" : {}
  	}
 ```
-Le nom d'un modèle est le nom du fichier sans extension associé au chemin relatif à la racine de la bibliothèque de modèle.
+Le nom d'un modèle est le nom sans extension du fichier, associé au chemin relatif depuis la racine de la bibliothèque de modèles.
 
-# Version
+## version
 
-La clé version est obligatoire.La version est un nombre entier positif qui augmente à chaque modification non rétrocompatible du lecteur de modèle. Actuellement la version est 0 et le restera jusqu'à la sortie d'une version stable de Gluon
+La clé obligatoire `version` spécifie la version du lecteur de modèle.
+La valeur doit être un entier naturel.
+Deux versions différentes sont considérées comme incompatibles.
+Actuellement, la version est `0` jusqu'à la sortie de la version stable.
 
-# Type
+## type
 
-Les deux valeurs possible sont `Basic` et `Storage`.Cette clé est optionnelle, si elle est absente, la valeur par défaut est soit la valeur indiqué par la catégorie la plus proche en amont du fichier, soit `Basic`.
+La clé optionnelle `type` spécifie le type du modèle.
+La valeur doit être `Basic` ou `Storage`.
+Par défaut, la valeur est celle indiquée par la catégorie la plus proche en amont du fichier, sinon `Basic`.
 
-# Alias
+## alias
 
-Cette clé est optionnelle et permet de donner des alternative pour le nom du modèle. Ces alternatives viendront remplacer le nom de fichier
+La clé optionnelle `alias` énumère les noms alternatifs du modèle.
+La valeur doit être une liste de chaînes de caractères.
 
-# Parent
+## parent
 
-La clé `parent` est optionnelle et permet de désigner un ou plusieur modèle dont ont doit hériter la structure. L'héritage est n'est pas destructeur, donc si une propriété est déjà fixé par le modèle ou l'un de ses parents, elle ne sera alors pas modifié. Cela signifie que l'ordre des parent est important
+La clé optionnelle `parent` identifie les modèles dont ce modèle hérite la structure.
+Lors du chargement des modèles, si une propriété est déjà définie par le modèle ou par un parent traité en amont, elle ne sera alors pas modifiée.
+La valeur doit être une liste de chaînes de caractères.
 
-# IsCategory
+## isCategory
 
-Permet de spécifié un modèle spécial qui définit les propriété de tout les objets présent dans un dossier du même nom et même chemin. Cela définit uniquement les propriété qui ne sont pas encore définie, si jamais un modèle en aval définit une propriété, elle ne sera pas modifié par la catégorie. Cette clé est optionnelle et par défaut la valeur est `false`.
+La clé optionnelle `isCategory` détermine si les propriétés du modèle se répercutent sur l'ensemble des modèles présents dans le dossier homonyme situé au même emplacement. 
+Seules les propriétés qui ne sont pas définies dans les modèles de ce dossier seront ajoutées.
+La valeur doit être un booléen. Par défaut, la valeur est `false`.
 
-# Properties
+## properties
 
-Détermine un ensemble de propriété que peut avoir un objet. Ces propriété suivent le formé [here](./datafield.md). 
+La clé optionnelle `properties` répertorie l'ensemble des propriétés du modèle.
+La valeur doit suivre le format de définition des [datafields](./datafield.md). 
 
-example : 
+Exemple : 
 ```json
 	{
 		"version" : 0,
 		"properties" : {
-			"propriété 1" : {"type" : "string"},
-			"nombre 1" : {"type" : "int"}
+			"propriete_1" : {"type" : "string"},
+			"nombre_1" : {"type" : "int"}
 		}
 	}
 ```
