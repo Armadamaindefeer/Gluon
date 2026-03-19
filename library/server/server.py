@@ -48,6 +48,7 @@ class Server:
 
 		for uuid,object_dict in data["data"].items():
 			if uuid == object_type.UUID_ROOT:
+				self.Database.childs = object_dict["child"]
 				continue
 
 			if type(uuid) != str:
