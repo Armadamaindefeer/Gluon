@@ -45,9 +45,9 @@ class App:
 			{
 				"*" : Command("*",self.cmd_reload_all),
 				"all" : Command("all",self.cmd_reload_all),
-				"config" : Command("config",self.cmd_reload_config),
-				"database" : Command("database",self.cmd_reload_database),
-				"model" : Command("model",self.cmd_reload_model)
+				"config" : Command("config",lambda _: self.reload_config()),
+				"database" : Command("database",lambda _: self.reload_database()),
+				"model" : Command("model",lambda _: self.reload_model())
 			},
 			"reload (*|all|config|database|model)",
 			defaultHandler = Command("reload",self.cmd_reload_all)
@@ -172,27 +172,24 @@ class App:
 				error(f"Unrecognised commande : '{input[0]}'")
 				return
 
-	def cmd_reload_all(self, shell:Shell):
-		info(f"Reloading everything")
-		self.Server.loadConfig(self.Server.Config_path) 
-		self.Server.loadDatabase(self.Server.Database_path)
-		self.Server.loadModels(self.Server.Model_library_path)
-		info(f"Loaded {len(self.Server.Model_library)} model(s)")
-
-
-	def cmd_reload_database(self, shell:Shell):
+	def reload_database(self):
 		info(f"Reloading database")
 		self.Server.loadDatabase(self.Server.Database_path)
 		info(f"Loaded {len(self.Server.Database.objects)} object(s)")
 
-	def cmd_reload_config(self, shell:Shell):
+	def reload_config(self):
 		info(f"Reloading config")
 		self.Server.loadConfig(self.Server.Config_path) 
 		
-	def cmd_reload_model(self, shell:Shell):
+	def reload_model(self):
 		info(f"Reloading model library")
 		self.Server.loadModels(self.Server.Model_library_path)
 		info(f"Loaded {len(self.Server.Model_library)} model(s)")
+
+	def cmd_reload_all(self, shell:Shell):
+		self.reload_config()
+		self.reload_model()
+		self.reload_database()
 
 	def cmd_start(self, shell: Shell):
 		if not self.Server.Initialized:
@@ -251,14 +248,18 @@ class App:
 		for property_name,property in model.properties.items():
 			filled.properties[property_name] = getProperty(property_name,property)
 
+		target = UUID_ROOT
+		text = f"Created new <{model.name}>"
 		if len(shell) > 1:
 			res, target = self.index(shell[1])
 			if res != 0:
 				error(f"error code {res}")
 				return
-			self.Server.Database.create(filled,target)
-		else:
-			self.Server.Database.create(filled)
+			target_ = self.Server.Database.objects[target]
+			text += f" inside [{shell[1]}] of type <{target_.model.name}>"
+
+		self.Server.Database.create(filled,target)
+		info(text)
 
 	def show_current(self):
 		current_ = self.Server.Database.objects[self.current_object]
