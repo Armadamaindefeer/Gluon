@@ -177,18 +177,22 @@ class App:
 		self.Server.loadConfig(self.Server.Config_path) 
 		self.Server.loadDatabase(self.Server.Database_path)
 		self.Server.loadModels(self.Server.Model_library_path)
+		info(f"Loaded {len(self.Server.Model_library)} model(s)")
+
 
 	def cmd_reload_database(self, shell:Shell):
 		info(f"Reloading database")
 		self.Server.loadDatabase(self.Server.Database_path)
+		info(f"Loaded {len(self.Server.Database.objects)} object(s)")
 
 	def cmd_reload_config(self, shell:Shell):
 		info(f"Reloading config")
 		self.Server.loadConfig(self.Server.Config_path) 
-
+		
 	def cmd_reload_model(self, shell:Shell):
 		info(f"Reloading model library")
 		self.Server.loadModels(self.Server.Model_library_path)
+		info(f"Loaded {len(self.Server.Model_library)} model(s)")
 
 	def cmd_start(self, shell: Shell):
 		if not self.Server.Initialized:
@@ -430,8 +434,6 @@ class App:
 		
 		quantity = int(shell[1])
 		target_.decrease(quantity)
-
-
 
 	def cmd_save(self, shell:Shell):
 		savePath = shell[0] if len(shell) != 0 else self.Server.Config["defaultSavePath"]

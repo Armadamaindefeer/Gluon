@@ -2,6 +2,7 @@ import json
 import os
 from library.common import ERROR
 from library.model.loader.type import *
+from library.dataField import validate_schema
 
 def findModel(path:str) -> set[tuple[str,str]]:
 	maybe = set()
@@ -29,6 +30,11 @@ def validateProperties(jsonData:dict) -> int:
 		return 0
 	if type(jsonData[KEY_PROPERTY]) != dict:
 		return ERROR.MALFORMED_PROPERTY
+	for key,datafield in jsonData[KEY_PROPERTY].items():
+		if type(datafield) != dict:
+			return ERROR.MALFORMED_PROPERTY
+		if not validate_schema(datafield):
+			return ERROR.MALFORMED_PROPERTY
 	return 0
 
 def validateParent(jsonData:dict) -> int:
