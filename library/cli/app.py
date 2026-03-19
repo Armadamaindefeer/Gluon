@@ -141,6 +141,13 @@ class App:
 			optional=1,
 		)(self.cmd_save)
 
+		Register(
+			"move",
+			"move objectId toId",
+			"Move an object to specified id",
+			mandatory=2
+		)(self.cmd_move)
+
 		self.CmdHandler.add_multiple_command(globalCommands)
 		self.Server.start(config_path,database_path,model_library_path)
 
@@ -298,8 +305,25 @@ class App:
 			print(f"[{i}] : {text_short(object)}")
 
 	def cmd_move(self, shell:Shell):
-		warn("NYI")
-	
+		warn("WIP")
+		res, target = self.index(shell[0])
+		if res != 0:
+			error(f"error code {res}")
+			return
+		res, storage = self.index(shell[1])
+		if res != 0:
+			error(f"error code {res}")
+			return
+		if target == storage:
+			error("Cannot save object inside itself")
+			return
+		if target == UUID_ROOT:
+			error("Cannot move the universe")
+			return
+		if(res := self.Server.Database.moveObject(target,storage)) != 0:
+			error(f"error code : {res}")
+		
+
 	def select_add(self,*uuidList:Uuid):
 		for uuid in uuidList:
 			if uuid in self.selected_key:
