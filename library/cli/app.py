@@ -1,7 +1,7 @@
 from library.server.server import Server
 from library.cmdUtils.command import Register, Shell, globalCommands, Command,CommandDir
 import library.cmdUtils.cmdUtils as cutils
-from library.common import debug,info, warn, error, fatal
+from library.common import ERROR, debug,info, warn, error, fatal
 from library.common import setLoggerInfo, setLoggerError, setLoggerWarn, setLoggerFatal, setLoggerDebug 
 from library.common import legalInfo, Version, SOURCE, getSource
 from library.object.type import UUID_ROOT, Storage, Uuid
@@ -9,7 +9,7 @@ from library.model.type import FilledModel
 from library.cli.utils import getCount, getProperty
 from library.cli.display import print_short, printObject, text_short
 import library.cli.command
-from enum import IntFlag, auto
+from enum import IntEnum, auto
 
 class App:
 		
@@ -78,7 +78,9 @@ class App:
 			{
 				#"new" : Command("new",self.model_new),
 				"list": Command("list",self.cmd_model_list)				
-			}
+			},
+			"model list",
+			"Various model utility"
 		))
 
 		self.CmdHandler.add_command(CommandDir(
@@ -110,7 +112,9 @@ class App:
 			{
 				"to" : Command("to",self.cmd_go_to,mandatory=1),
 				"back" : Command("back",self.cmd_go_back)
-			}
+			},
+			"go <back|to id>","" \
+			"Move around universe"
 		))
 
 		Register(
@@ -154,7 +158,7 @@ class App:
 		info("Gluon server has successfuly been initialized") #TEXT
 		info(f"Welcome {self.Server.Config['username']}") #TEXT
 
-	class ERROR(IntFlag):
+	class ERROR(IntEnum):
 		INVALID_ARGUMENT = auto()
 		INVALID_LOCAL_INDEX = auto()
 		INVALID_SELECTED_INDEX = auto()
@@ -169,7 +173,7 @@ class App:
 				info("\tusage : "+ command.usage)
 
 		if len(input) == 1:
-			for command in globalCommands:
+			for command in self.CmdHandler.cmd_list.values():
 				if input[0] == command.syntax:
 					info("- " + command.syntax)
 					info("\t" + command.desc)
@@ -260,7 +264,7 @@ class App:
 		if len(shell) > 1:
 			res, target = self.index(shell[1])
 			if res != 0:
-				error(f"error code {res}")
+				error(f"Invalid Index '{shell[1]}', error code : {res}")
 				return
 			target_ = self.Server.Database.objects[target]
 			text += f" inside [{shell[1]}] of type <{target_.model.name}>"
@@ -292,7 +296,7 @@ class App:
 		elif len(shell) == 1:
 			res, uuid = self.index(shell[0])
 			if res != 0:
-				error(f"error code {res}")
+				error(f"Invalid Index '{shell[0]}', error code : {res}")
 				return
 			self.show_uuid(uuid)
 
@@ -305,14 +309,13 @@ class App:
 			print(f"[{i}] : {text_short(object)}")
 
 	def cmd_move(self, shell:Shell):
-		warn("WIP")
 		res, target = self.index(shell[0])
 		if res != 0:
-			error(f"error code {res}")
+			error(f"Invalid Index '{shell[0]}', error code : {res}")
 			return
 		res, storage = self.index(shell[1])
 		if res != 0:
-			error(f"error code {res}")
+			error(f"Invalid Index '{shell[1]}', error code : {res}")
 			return
 		if target == storage:
 			error("Cannot save object inside itself")
@@ -355,7 +358,7 @@ class App:
 
 		res, target = self.index(shell[0])
 		if res != 0:
-			error(f"error code : {res}")
+			error(f"Invalid Index '{shell[0]}', error code : {res}")
 			return
 		
 		if target in self.selected_key:
@@ -392,7 +395,7 @@ class App:
 
 		res, target = self.index(shell[0])
 		if res != 0:
-			error(f"error code {res}")
+			error(f"Invalid Index '{shell[0]}', error code : {res}")
 			return
 		target_ = self.Server.Database.objects[target]
 
@@ -400,7 +403,6 @@ class App:
 			error(f"Target index isn't a storage")
 
 		self.current_object = target
-
 
 	def cmd_go_back(self, shell:Shell):
 		if self.current_object == UUID_ROOT:
@@ -411,17 +413,23 @@ class App:
 
 	def cmd_destroy(self, shell:Shell):
 		res, target = self.index(shell[0])
-		if target == UUID_ROOT:
-			error("Trying to delete the universe")
+		if res != 0:
+			error(f"Invalid Index '{shell[0]}', error code : {res}")
 			return
 		if target == self.current_object:
 			error("Trying to delete current object")
 			return
-		
 		if(res := self.Server.Database.destroy(target)) != 0:
-			error(f"error code : {res}")
+			if res == ERROR.MODIFIYING_UNIVERSE:
+				error("Trying to delete the universe")
+			else:
+				error(f"error code : {ERROR.from_bytes}")
 			return
 
+		if target == UUID_ROOT:
+			error("Trying to delete the universe")
+			return
+		
 		if target in self.selected_key:
 			self.selected_list.remove(target)
 			self.selected_key.remove(target)
@@ -429,7 +437,7 @@ class App:
 	def cmd_increase(self,shell:Shell):
 		res, target = self.index(shell[0])
 		if res != 0:
-			error(f"error code {res}")
+			error(f"Invalid Index '{shell[0]}', error code : {res}")
 			return
 		target_ = self.Server.Database.objects[target]
 		if isinstance(target_,Storage) and not target_.isEmpty():
@@ -437,7 +445,7 @@ class App:
 			return
 
 		if not shell[1].isdigit():
-			error(f"Invalid quantity {shell[1]}")
+			error(f"Invalid quantity '{shell[1]}'")
 			return
 		
 		quantity = int(shell[1])
@@ -446,7 +454,7 @@ class App:
 	def cmd_decrease(self,shell:Shell):
 		res, target = self.index(shell[0])
 		if res != 0:
-			error(f"error code {res}")
+			error(f"Invalid Index '{shell[0]}', error code : {res}")
 			return
 		target_ = self.Server.Database.objects[target]
 		if isinstance(target_,Storage) and not target_.isEmpty():
@@ -454,7 +462,7 @@ class App:
 			return
 
 		if not shell[1].isdigit():
-			error(f"Invalid quantity {shell[1]}")
+			error(f"Invalid quantity '{shell[1]}'")
 			return
 		
 		quantity = int(shell[1])
@@ -465,4 +473,4 @@ class App:
 		res = self.Server.saveDatabase(savePath)
 		if res != 0:
 			error(f"error code : {res}")
-		return 		
+		return

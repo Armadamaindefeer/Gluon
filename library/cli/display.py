@@ -27,7 +27,7 @@ def text_short(object:object_type.Generic):
 
 
 def print_short(object:object_type.Generic):
-	print(text_short(object))
+	print("\r" + text_short(object))
 
 def print_properties(object:object_type.Generic):
 	if len(object.properties) == 0:

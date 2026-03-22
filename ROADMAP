@@ -11,7 +11,7 @@ v1
 
 v1.5
 - Create user utilities
-	- Stock manager : warn when object count under set threshold
+	- Stock manager : warn when object amount under set threshold
 	- Generate shopping list
 - Create flask server for remote use (and fast manipulation)
 
