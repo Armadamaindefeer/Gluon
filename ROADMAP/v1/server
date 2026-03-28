@@ -1,0 +1,13 @@
+- While loading models, keep track of error and report to load caller
+- Make `move` operation atomic
+- Define safe concurrent access to database
+- Create concept of client:
+	- type of clients : `viewer`, `writer`, `admin`
+		- `viewer` can only read the database, unlimited number of `viewer` client allowed simultanously
+		- `writer` can read the database, create, move and destroy object, only one `writer`client. `writer` client should stay at `writer` only while actively editing database
+		- `admin` can modifie database configuration, load and save backup and as maximum priority over `writer` client.
+- allow to search database through filters
+- Remove dependency on `common.py` for object error handling and version handling
+- Create concept of layers
+	- `server` layer is every logic that directly modify the database and hold data
+	- `app` layer is every logic intended to interface with an agent (another app, humain)
