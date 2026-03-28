@@ -19,9 +19,9 @@ def findModel(path:str) -> set[tuple[str,str]]:
 def validateVersion(jsonData:dict) -> int:
 	if not KEY_VERSI0N in jsonData:
 		return ERROR.UNKNOWN_VERSION
-	if jsonData[KEY_VERSI0N] < CURRENT_VERSION:
+	if jsonData[KEY_VERSI0N] < VERSION.version:
 		return ERROR.VERSION_OUTDATED
-	if jsonData[KEY_VERSI0N] > CURRENT_VERSION:
+	if jsonData[KEY_VERSI0N] > VERSION.version:
 		return ERROR.UNKNOWN_VERSION
 	return 0
 

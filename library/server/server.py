@@ -5,12 +5,16 @@ from library.config import loadConfig
 from library.model.loader.loader import constructModels
 from library.object.factory import make_dict
 import library.object.type as object_type
+from library.version import Version
 
 import sys
 import json
 import os
 
 class Server:
+	version_server = Version("GluonServer",0)
+	version_database_loader = Version("database_loader",1)
+
 	def __init__(self) -> None:
 		self.Database:Universe = Universe()
 		self.Database_path = ""
@@ -36,7 +40,7 @@ class Server:
 			data = json.load(f)
 		if "version" not in data:
 			return ERROR.UNKNOWN_VERSION
-		if data["version"] != 1:
+		if data["version"] != Server.version_database_loader.version:
 			return ERROR.UNKNOWN_VERSION
 		if "data" not in data:
 			return ERROR.MALFORMED_DATABASE

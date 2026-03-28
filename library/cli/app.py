@@ -3,16 +3,18 @@ from library.cmdUtils.command import Register, Shell, globalCommands, Command,Co
 import library.cmdUtils.cmdUtils as cutils
 from library.common import ERROR, debug,info, warn, error, fatal
 from library.common import setLoggerInfo, setLoggerError, setLoggerWarn, setLoggerFatal, setLoggerDebug 
-from library.common import legalInfo, Version, SOURCE, getSource
+from library.common import legalInfo, SOURCE, getSource
 from library.object.type import UUID_ROOT, Storage, Uuid
 from library.model.type import FilledModel
 from library.cli.utils import getCount, getProperty
 from library.cli.display import print_short, printObject, text_short
 import library.cli.command
 from enum import IntEnum, auto
+from library.version import Version
 
 class App:
-		
+	version = Version("GluonCLI",0)
+
 	def __init__(self,config_path:str,database_path:str,model_library_path:str)-> None:
 		self.CmdHandler = cutils.CmdHandler(SOURCE)
 		self.Server = Server()
@@ -30,7 +32,7 @@ class App:
 		setLoggerFatal(lambda text: cutils.fatal(text,getSource()))
 		setLoggerDebug(lambda text: cutils.debug(text,getSource()))
 
-		info(f"Initializing Gluon-{Version}") #TEXT
+		info(f"Initializing Gluon-v{self.Server.version_server.version}") #TEXT
 		warn("Experimental version, proceed with caution") #TEXT
 
 		Register(
@@ -151,6 +153,13 @@ class App:
 			"Move an object to specified id",
 			mandatory=2
 		)(self.cmd_move)
+
+		Register(
+			"version",
+			"version (moduleName)",
+			"Show version for the specified module (or all)",
+			optional=1
+		)(self.cmd_version)
 
 		self.CmdHandler.add_multiple_command(globalCommands)
 		self.Server.start(config_path,database_path,model_library_path)
@@ -474,3 +483,15 @@ class App:
 		if res != 0:
 			error(f"error code : {res}")
 		return
+
+	def cmd_version(self,shell:Shell):
+		info("Version:")
+		if len(shell) == 1:
+			res = Version.modules.get(shell[0])
+			if res ==None:
+				error(f"Unknown module '{shell[0]}'")
+			else:
+				info(f"{shell[0]} : {res}")
+		else:
+			for name,version in Version.modules.items():
+				info(f"{name} : {version}")
