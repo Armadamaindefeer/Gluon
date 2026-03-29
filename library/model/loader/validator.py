@@ -94,8 +94,8 @@ def validateModels(root_path:str,models:set[tuple[str,str]])-> list[tuple[dict,s
 	validated = []
 	for dirpath,name in models:
 		model_path = "/".join((root_path,dirpath,name)) + FILE_EXT_MODEL
-		result = validateModel(model_path)
-		if result[0] != 0:
+		result,data = validateModel(model_path)
+		if result != 0:
 			continue
-		validated.append((result[1],dirpath,name))
+		validated.append((data,dirpath,name))
 	return validated

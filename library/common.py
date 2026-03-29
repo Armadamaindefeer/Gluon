@@ -20,14 +20,6 @@ import uuid
 import json
 import enum
 
-Version_changelog:dict[str,list[str]] = {
-	"alpha-v0.0.0": ["Starting experimental rewrite","Currently no useable database","Incompatible with previous installation","run stable.py if you want previous stable version"]
-}
-
-Version_history = list(Version_changelog.keys())
-
-Version = "alpha-v0.0.0"
-
 Uuid = str
 
 def genUUID(existing:set):

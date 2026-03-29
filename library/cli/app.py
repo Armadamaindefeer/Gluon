@@ -1,16 +1,18 @@
+import sys
+
 from library.server.server import Server
 from library.cmdUtils.command import Register, Shell, globalCommands, Command,CommandDir
-import library.cmdUtils.cmdUtils as cutils
 from library.common import ERROR, debug,info, warn, error, fatal
 from library.common import setLoggerInfo, setLoggerError, setLoggerWarn, setLoggerFatal, setLoggerDebug 
 from library.common import legalInfo, SOURCE, getSource
 from library.object.type import UUID_ROOT, Storage, Uuid
 from library.model.type import FilledModel
 from library.cli.utils import getCount, getProperty
-from library.cli.display import print_short, printObject, text_short
-import library.cli.command
+from library.cli.display import print_properties, print_short, text_short
 from enum import IntEnum, auto
 from library.version import Version
+
+import library.cmdUtils.cmdUtils as cutils
 
 class App:
 	version = Version("GluonCLI",0)
@@ -78,7 +80,7 @@ class App:
 		self.CmdHandler.add_command(CommandDir(
 			"model",
 			{
-				#"new" : Command("new",self.model_new),
+				#"new" : Command("new",self.cmd_model_new,optional=1),
 				"list": Command("list",self.cmd_model_list)				
 			},
 			"model list",
@@ -281,23 +283,29 @@ class App:
 		self.Server.Database.create(filled,target)
 		info(text)
 
-	def show_current(self):
-		current_ = self.Server.Database.objects[self.current_object]
-		print_short(current_)	
-		if not isinstance(current_,Storage):
-			error("Current object isn't a storage")	
+	def show_storage(self,uuid):
+		storage_ = self.Server.Database.objects[uuid]
+		if not isinstance(storage_, Storage):
 			return
 
 		print('Stored objects : ')
-		if len(current_.childs) == 0:
+		if len(storage_.childs) == 0:
 			print("Nothing to see here...")
-		for i,childUuid in enumerate(current_.childs,start=1):
+		for i,childUuid in enumerate(storage_.childs,start=1):
 			text = text_short(self.Server.Database.objects[childUuid])
-			print(f"[{i}] : {text}")
+			print(f"{'*' if childUuid in self.selected_key else " "}[{i}] : {text}")
+
+	def show_current(self):
+		current_ = self.Server.Database.objects[self.current_object]
+		print_short(current_)	
+		self.show_storage(self.current_object)
 
 	def show_uuid(self,uuid:Uuid):
 		object_ = self.Server.Database.objects[uuid]
-		printObject(object_)
+		print("")
+		print_short(object_)
+		print_properties(object_)
+		self.show_storage(uuid)
 
 	def cmd_show(self, shell:Shell):
 		if len(shell) == 0:
@@ -389,7 +397,7 @@ class App:
 		self.select_remove(int(shell[0])-1)
 
 	def cmd_model_new(self, shell:Shell):
-		warn("NYI")
+		...
 
 	def cmd_model_list(self, shell:Shell):
 		info(f"Currently {len(self.Server.Model_library)} loaded model(s) :")
@@ -410,7 +418,9 @@ class App:
 
 		if not isinstance(target_,Storage):
 			error(f"Target index isn't a storage")
+			return
 
+		info(f"Moved to {text_short(target_)}")
 		self.current_object = target
 
 	def cmd_go_back(self, shell:Shell):
@@ -479,6 +489,7 @@ class App:
 
 	def cmd_save(self, shell:Shell):
 		savePath = shell[0] if len(shell) != 0 else self.Server.Config["defaultSavePath"]
+		info(f"Saving to '{savePath}'")
 		res = self.Server.saveDatabase(savePath)
 		if res != 0:
 			error(f"error code : {res}")
@@ -495,3 +506,8 @@ class App:
 		else:
 			for name,version in Version.modules.items():
 				info(f"{name} : {version}")
+
+	def cmd_exit(self,shell:Shell) -> None:
+		exitCode:str = shell[0] if len(shell) > 0 else ""
+		if cutils.Validate("Voulez vous quitter ?",SOURCE,enterIsYes=True): #TEXT
+			sys.exit(exitCode)

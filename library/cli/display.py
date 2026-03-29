@@ -20,7 +20,7 @@ def print_short_storage(object:object_type.Storage):
 	print(text_short_storage(object))
 
 def text_short(object:object_type.Generic):
-	if isinstance(object,object_type.Storage):
+	if isinstance(object,object_type.Storage) and not object.isEmpty():
 		return text_short_storage(object)
 	elif isinstance(object,object_type.Generic):
 		return text_short_generic(object)
@@ -43,12 +43,3 @@ def print_generic(object:object_type.Generic):
 def print_storage(object:object_type.Storage):
 	print_short_storage(object)
 	print_properties(object)
-
-
-def printObject(object:object_type.Generic):
-	if isinstance(object,object_type.Storage):
-		print_storage(object)
-	elif isinstance(object,object_type.Generic):
-		print_generic(object)
-	else:
-		print_generic(object)
