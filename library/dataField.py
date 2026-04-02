@@ -12,7 +12,45 @@ DATAFIELD_ARGUMENT = {
 	"type",
 	"allowNone",
 	"default",
-	"selectValue"
+	"selectValue",
+	"constraint"
+}
+
+CONSTRAINT_COMPARAISON = {
+	"<",
+	">",
+	"==",
+	"!=",
+	"<=",
+	">=",
+}
+
+CONSTRAINT_RANGE = {
+	"range",
+	"set"
+}
+
+CONSTRAINT_BINARY = {
+	"<" : lambda value,test : value < test,
+	">" : lambda value,test : value > test,
+	"<=" : lambda value,test : value <= test,
+	">=" : lambda value,test : value >= test,
+	"==" : lambda value,test : value == test,
+	"!=" : lambda value,test : value != test,
+	"<" : lambda value,test : value < test,
+}
+
+CONSTRAINT_LIST = {
+	"range" : lambda value, a,b : value >= a and value <= b,
+	"set" : lambda value, *set : value in set 
+}
+
+CONSTRAINT_SET = lambda value, *args : value in args
+
+DATAFIELD_CONSTRAINT_PER_TYPE = {
+	"int" : CONSTRAINT_COMPARAISON | CONSTRAINT_RANGE,
+	"float" : CONSTRAINT_COMPARAISON | CONSTRAINT_RANGE,
+	"string" : {"set"}
 }
 
 def validate_schema(schema:dict) -> bool:
@@ -40,6 +78,36 @@ def validate_schema(schema:dict) -> bool:
 		for value in schema["selectValue"]:
 			if type(value) != schema_type:
 				return False
+
+	if 'constraint' in schema:
+		constraint = schema["constraint"]
+		if type(constraint) != dict:
+			return False
+		if not "type" in constraint:
+			return False
+		if type(constraint["type"]) != str:
+			return False
+		if constraint["type"] not in DATAFIELD_CONSTRAINT_PER_TYPE[schema["type"]]:
+			return False
+
+		if not "value" in constraint:
+			return False
+
+		if constraint["type"] in CONSTRAINT_BINARY:
+			if type(constraint["value"]) not in (int,float):
+				return False
+		if constraint["type"] in CONSTRAINT_RANGE:
+			if type(constraint["value"]) != list:
+				return False
+			if constraint["type"] == "range" and len(constraint["value"]) != 2:
+				return False
+			for element in constraint["value"]:
+				if constraint["type"] == "range":
+					if type(element) not in (int,float):
+						return False
+				if constraint["type"] == "set":
+					if type(element) != schema_type:
+						return False
 
 	allowNone = False
 	if "allowNone" in schema:
