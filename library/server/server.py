@@ -32,9 +32,11 @@ class Server:
 
 	def loadDatabase(self,path:str) -> int:
 
-		if not os.path.exists(path):
-			return self.saveDatabase(path)
+		# if not os.path.exists(path):
+		# 	return self.saveDatabase(path)
 		
+		self.saveDatabase(path)
+
 		data = {}
 		with open(path,"rt",encoding="utf-8") as f:
 			data = json.load(f)
