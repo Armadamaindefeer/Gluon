@@ -96,7 +96,7 @@ def default_schema(schema:dict):
 	return DATAFIELD_TYPE[schema["type"]]()
 
 def default_list(list:typing.Iterable[dict]):
-	return (default_schema for schema in list)
+	return (default_schema(schema) for schema in list)
 
 def default_dict(schema_dict:dict):
 	return {name:default_schema(schema) for name,schema in schema_dict.items()}
