@@ -1,0 +1,10 @@
+- Add model creation to CLI (command `model new`)
+- Allow operating on multiple objects
+	- Add range to object selection
+		- format : `PREFIX[x..y]` : select all object between x and y inclusive
+		- format : `PREFIX[..y]` : select all object until index y inclusive
+		- format : `PREFIX[x..]` : select all object after index x inclusive
+		- format : `PREFIX*` : select all object inside container (select or local)
+		- `PREFIX` designate select prefix `$` or context prefix `#` or ``
+		- Range selection is only valid for `context` index and `selected` index
+- Display wich object are selected when using `show` command

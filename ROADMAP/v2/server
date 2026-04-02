@@ -1,0 +1,3 @@
+- Integrate API to communicate with server
+- Move operation on multiple object for `app` layer to `server` layer
+- Experiment :  implement scripting utils on `viewer` level to allow `shopping-remainder` script to be executed

@@ -1,0 +1,14 @@
+- Create new type : date
+- Create new type : fixed, constant datafield, cannot be edited
+- Add type constraint, allow user to defined condition for the validity of a value
+	- new key `constraint` wich define the constraint type
+	- Move selectValue to constraint and rename to `set`
+	- Create constraint type for number type:
+		- `>=` : greater or equal
+		- `<=` : lesser or equal
+		- `>` : greater than
+		- `<` : lesser than
+		- `><` : within (range)
+- Define constraint where type is `string`
+- Define constraint where type is `date`
+- Add special key `unitSystem` for number class (currently : integer and floating point)

@@ -1,9 +1,0 @@
-{
-	"args" : {
-		"Numéro de rue" : {"type" : "number", "unitSystem" :"unit"},
-		"voie" : {"type" : "string"},
-		"ville" : {"type" : "string"},
-		"codePostal" : {"type" : "string"},
-		"pays" : {"type" : "string"}
-	}
-}

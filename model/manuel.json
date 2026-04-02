@@ -1,5 +1,0 @@
-{
-	"args" : {
-		"target" : {"type":  "object", "objectType" : "uuid", "allowNone" : true}
-	}
-}
