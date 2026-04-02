@@ -1,7 +1,7 @@
 from library.object.universe import Universe
 import library.model.type as model_type
 from library.common import info, error, warn, debug, fatal, ERROR
-from library.config import loadConfig
+from library.config import loadConfig, save as saveConfig
 from library.model.loader.loader import constructModels
 from library.object.factory import make_dict
 import library.object.type as object_type
@@ -118,4 +118,5 @@ class Server:
 
 	def exit(self,error_code):
 		self.saveDatabase(PATH_DATABASE)
+		saveConfig(self.Config,PATH_CONFIG)
 		sys.exit(error_code)

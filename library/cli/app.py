@@ -10,6 +10,7 @@ from library.object.type import UUID_ROOT, Storage, Uuid
 from library.model.type import FilledModel
 from library.cli.utils import getCount, getProperty
 from library.cli.display import print_properties, print_short, text_short
+from library.config import config_scheme , save as saveConfig
 from enum import IntEnum, auto
 from library.version import Version
 
@@ -164,11 +165,21 @@ class App:
 			optional=1
 		)(self.cmd_version)
 
+		Register(
+			"config",
+			"config (configKey)",
+			"Allow to configure application parameters",
+			optional=1
+		)(self.cmd_config)
+
 		self.CmdHandler.add_multiple_command(globalCommands)
 		self.Server.start()
 
 		info("Gluon server has successfuly been initialized") #TEXT
-		info(f"Welcome {self.Server.Config['Username']}") #TEXT
+		if self.Server.Config["Username"] != None:
+			info(f"Welcome {self.Server.Config['Username']}") #TEXT
+		else:
+			info("You can configure the app via the 'config' command")
 
 	class ERROR(IntEnum):
 		INVALID_ARGUMENT = auto()
@@ -508,3 +519,25 @@ class App:
 		exitCode:str = shell[0] if len(shell) > 0 else ""
 		if cutils.Validate("Voulez vous quitter ?",SOURCE,enterIsYes=True): #TEXT
 			sys.exit(exitCode)
+
+	def cmd_config(self, shell:Shell) -> None:
+		config_key_list = list(config_scheme.keys())
+		config_key = config_key_list[0]
+		if len(shell) == 0:
+			index = cutils.Choice("Select a value to edit",SOURCE,config_key_list)
+			config_key = config_key_list[index]
+		else:
+			if shell[0] not in config_scheme:
+				error("Invalid config key provided")
+				return
+			else:
+				config_key = shell[0]
+		current_value = self.Server.Config.get(config_key)
+		info(f"Current value for key '{config_key}' = {current_value}")
+		new_value = getProperty(config_key,config_scheme[config_key])
+		res = cutils.Validate(f"Replace '{current_value}' by '{new_value}' ?",SOURCE,True)
+		if not res:
+			info("Cancelling")
+			return
+		self.Server.Config[config_key] = new_value
+		saveConfig(self.Server.Config,PATH_CONFIG)
