@@ -1,5 +1,6 @@
 import sys
 
+from library.server.default import PATH_DATABASE
 from library.server.server import Server
 from library.cmdUtils.command import Register, Shell, globalCommands, Command,CommandDir
 from library.common import ERROR, debug,info, warn, error, fatal
@@ -17,7 +18,7 @@ import library.cmdUtils.cmdUtils as cutils
 class App:
 	version = Version("GluonCLI",0)
 
-	def __init__(self,config_path:str,database_path:str,model_library_path:str)-> None:
+	def __init__(self)-> None:
 		self.CmdHandler = cutils.CmdHandler(SOURCE)
 		self.Server = Server()
 
@@ -164,10 +165,10 @@ class App:
 		)(self.cmd_version)
 
 		self.CmdHandler.add_multiple_command(globalCommands)
-		self.Server.start(config_path,database_path,model_library_path)
+		self.Server.start()
 
 		info("Gluon server has successfuly been initialized") #TEXT
-		info(f"Welcome {self.Server.Config['username']}") #TEXT
+		info(f"Welcome {self.Server.Config['Username']}") #TEXT
 
 	class ERROR(IntEnum):
 		INVALID_ARGUMENT = auto()
@@ -215,11 +216,7 @@ class App:
 
 	def cmd_start(self, shell: Shell):
 		if not self.Server.Initialized:
-			self.Server.start(
-				self.Server.Config_path,
-				self.Server.Database_path,
-				self.Server.Model_library_path
-			)
+			self.Server.start()
 		else:
 			warn("Server already started")
 
@@ -488,7 +485,7 @@ class App:
 		target_.decrease(quantity)
 
 	def cmd_save(self, shell:Shell):
-		savePath = shell[0] if len(shell) != 0 else self.Server.Config["defaultSavePath"]
+		savePath = shell[0] if len(shell) != 0 else PATH_DATABASE
 		info(f"Saving to '{savePath}'")
 		res = self.Server.saveDatabase(savePath)
 		if res != 0:

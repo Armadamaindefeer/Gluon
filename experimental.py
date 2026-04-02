@@ -5,7 +5,7 @@ from library.cli.app import App
 
 def main() -> None:	
 	#cutils.toggleInternalDebug()
-	app = App("./env/config.json","./env/database.json","./env/model/example/")
+	app = App()
 
 	running = True
 	while running:

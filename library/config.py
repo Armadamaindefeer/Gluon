@@ -5,8 +5,8 @@ from library.dataField import default_dict, validate_value, default_schema
 from library.common import jsonErrorSystem
 
 config_scheme = {
-	"username" : {"type" : "string","allowNone": True,"default" : None},
-	"defaultSavePath" : {"type" : "string","allowNone":False,"default":"./env/database.json"}
+	"Username" : {"type" : "string","allowNone": True,"default" : None},
+	"ModelLibraryPath" : {"type" : "string", "allowNone" : False, "default" : "./env/model/"}
 }
 
 def save(data,path):
@@ -22,7 +22,7 @@ def default_and_save(path):
 def loadConfig(path:str) -> dict:
 	config = dict()
 
-	if not os.path.isfile(path):
+	if not os.path.exists(path):
 		config = default_and_save(path)
 
 	if not (os.path.splitext(path)[1] == ".json"):

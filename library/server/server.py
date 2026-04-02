@@ -5,6 +5,7 @@ from library.config import loadConfig
 from library.model.loader.loader import constructModels
 from library.object.factory import make_dict
 import library.object.type as object_type
+from library.server.default import PATH_CONFIG, PATH_DATABASE
 from library.version import Version
 
 import sys
@@ -24,18 +25,20 @@ class Server:
 		self.Model_library_path = ""
 		self.Initialized = False
 	
-	def loadConfig(self,path) -> int:
+	def loadConfig(self,path:str) -> int:
 		self.Config = loadConfig(path)
 		return 0
 
-	def loadModels(self,path) -> int:
+	def loadModels(self,path:str) -> int:
 		self.Model_library = constructModels(path)
 		return 0
 
-	def loadDatabase(self,path) -> int:
-		data = {}
+	def loadDatabase(self,path:str) -> int:
+
 		if not os.path.exists(path):
-			return ERROR.UNEXISTANT_FILE
+			return self.saveDatabase(path)
+		
+		data = {}
 		with open(path,"rt",encoding="utf-8") as f:
 			data = json.load(f)
 		if "version" not in data:
@@ -85,11 +88,12 @@ class Server:
 
 		return 0
 
-	def saveDatabase(self,save_path) -> int:
+	def saveDatabase(self,save_path=PATH_DATABASE) -> int:
 		save_data = {
 			"version" : 1,
 			"data" : {}
 		}
+
 		for object_ in self.Database.objects.values():
 			save_data["data"][object_.uuid] =  make_dict(object_)[1]
 		try:
@@ -101,24 +105,20 @@ class Server:
 			json.dump(save_data,o,ensure_ascii=False,indent="\t")
 		return 0
 
-	def start(self,config_path:str,database_path:str,model_library_path:str):
-		self.Config_path = config_path
-		self.Database_path = database_path
-		self.Model_library_path = model_library_path
-		if(res := self.loadConfig(config_path)) != 0:
-			fatal(f"Could not load config (code :{res})")
-			self.exit(res)
-		if(res := self.loadModels(model_library_path)) != 0:
+	def start(self):
+		if (res := self.loadConfig(PATH_CONFIG)) != 0:
+			fatal(f"Could not load config (code : {res})")
+
+		Model_library_path = self.Config["ModelLibraryPath"]
+
+		if(res := self.loadModels(Model_library_path)) != 0:
 			fatal(f"Could not load model library (code : {res})")
 			self.exit(res)
-
-		if os.path.exists(self.Database_path):
-			res = self.loadDatabase(database_path)
-			if res != 0:
-				fatal(f"Could not load database (code : {res})")
-				self.exit(res)			
-		self.Initialized = True
+			
+		if(res := self.loadDatabase(PATH_DATABASE)) != 0:
+			fatal(f"Could not load model library")
+			self.exit(res)
 
 	def exit(self,error_code):
-		self.saveDatabase(save_path=self.Config["defaultSavePath"])
+		self.saveDatabase(PATH_DATABASE)
 		sys.exit(error_code)
