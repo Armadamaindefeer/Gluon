@@ -1,6 +1,6 @@
 import sys
 
-from library.server.default import PATH_DATABASE
+from library.server.default import PATH_CONFIG, PATH_DATABASE
 from library.server.server import Server
 from library.cmdUtils.command import Register, Shell, globalCommands, Command,CommandDir
 from library.common import ERROR, debug,info, warn, error, fatal
@@ -197,16 +197,16 @@ class App:
 
 	def reload_database(self):
 		info(f"Reloading database")
-		self.Server.loadDatabase(self.Server.Database_path)
+		self.Server.loadDatabase(PATH_DATABASE)
 		info(f"Loaded {len(self.Server.Database.objects)} object(s)")
 
 	def reload_config(self):
 		info(f"Reloading config")
-		self.Server.loadConfig(self.Server.Config_path) 
+		self.Server.loadConfig(PATH_CONFIG) 
 		
 	def reload_model(self):
 		info(f"Reloading model library")
-		self.Server.loadModels(self.Server.Model_library_path)
+		self.Server.loadModels(self.Server.Config["ModelLibraryPath"])
 		info(f"Loaded {len(self.Server.Model_library)} model(s)")
 
 	def cmd_reload_all(self, shell:Shell):

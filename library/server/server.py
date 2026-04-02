@@ -18,11 +18,8 @@ class Server:
 
 	def __init__(self) -> None:
 		self.Database:Universe = Universe()
-		self.Database_path = ""
 		self.Config = dict()	
-		self.Config_path = ""
 		self.Model_library:dict[str,model_type.Model] = dict()
-		self.Model_library_path = ""
 		self.Initialized = False
 	
 	def loadConfig(self,path:str) -> int:
