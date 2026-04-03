@@ -1,6 +1,6 @@
 from library.common import Source, error, info
 import library.cmdUtils.cmdUtils as cutils
-from library.dataField import default_schema
+from library.datafield.datafield import default_schema
 
 
 def getNumber(type,text):

@@ -1,7 +1,7 @@
 import os
 import json
 
-from library.dataField import default_dict, validate_value, default_schema
+from library.datafield.datafield import default_dict, validate_value, default_schema
 from library.common import jsonErrorSystem
 
 config_scheme = {

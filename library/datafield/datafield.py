@@ -1,57 +1,5 @@
 import typing
-
-DATAFIELD_TYPE = {
-	"string" : str,
-	"bool" : bool,
-	"int" : int,
-	"float" : float,
-	"comment" : str
-}
-
-DATAFIELD_ARGUMENT = {
-	"type",
-	"allowNone",
-	"default",
-	"selectValue",
-	"constraint"
-}
-
-CONSTRAINT_COMPARAISON = {
-	"<",
-	">",
-	"==",
-	"!=",
-	"<=",
-	">=",
-}
-
-CONSTRAINT_RANGE = {
-	"range",
-	"set"
-}
-
-CONSTRAINT_BINARY = {
-	"<" : lambda value,test : value < test,
-	">" : lambda value,test : value > test,
-	"<=" : lambda value,test : value <= test,
-	">=" : lambda value,test : value >= test,
-	"==" : lambda value,test : value == test,
-	"!=" : lambda value,test : value != test,
-	"<" : lambda value,test : value < test,
-}
-
-CONSTRAINT_LIST = {
-	"range" : lambda value, a,b : value >= a and value <= b,
-	"set" : lambda value, *set : value in set 
-}
-
-CONSTRAINT_SET = lambda value, *args : value in args
-
-DATAFIELD_CONSTRAINT_PER_TYPE = {
-	"int" : CONSTRAINT_COMPARAISON | CONSTRAINT_RANGE,
-	"float" : CONSTRAINT_COMPARAISON | CONSTRAINT_RANGE,
-	"string" : {"set"}
-}
+from library.datafield.type import *
 
 def validate_schema(schema:dict) -> bool:
 	if not "type" in schema:
@@ -69,7 +17,7 @@ def validate_schema(schema:dict) -> bool:
 		return True
 
 	for key in schema:
-		if key not in DATAFIELD_ARGUMENT:
+		if key not in KEY_BASE:
 			return False
 	
 	if 'selectValue' in schema:

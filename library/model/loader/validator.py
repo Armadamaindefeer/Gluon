@@ -2,7 +2,7 @@ import json
 import os
 from library.common import ERROR
 from library.model.loader.type import *
-from library.dataField import validate_schema
+from library.datafield.datafield import validate_schema
 
 def findModel(path:str) -> set[tuple[str,str]]:
 	maybe = set()
