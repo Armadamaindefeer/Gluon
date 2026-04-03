@@ -3,3 +3,5 @@ __pycache__
 database.json
 env/
 *.bak
+.coverage
+.vscode
