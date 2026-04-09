@@ -10,7 +10,6 @@ KEY_BASE = {
 	"type",
 	"allowNone",
 	"default",
-	"selectValue",
 	"constraint"
 }
 
