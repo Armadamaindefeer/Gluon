@@ -29,20 +29,7 @@ DATAFIELD_KEY_TYPE = {
 	"selectValue" : list,
 	"constraint" : dict
 }
-
-CONSTRAINT_COMPARAISON = {
-	"<",
-	">",
-	"==",
-	"!=",
-	"<=",
-	">=",
-}
-
-CONSTRAINT_RANGE = {
-	"range",
-	"set"
-}
+CONSTRAINT_UNARY = dict()
 
 CONSTRAINT_BINARY = {
 	"<" : lambda value,test : value < test,
@@ -50,19 +37,23 @@ CONSTRAINT_BINARY = {
 	"<=" : lambda value,test : value <= test,
 	">=" : lambda value,test : value >= test,
 	"==" : lambda value,test : value == test,
-	"!=" : lambda value,test : value != test,
-	"<" : lambda value,test : value < test,
+	"!=" : lambda value,test : value != test
 }
 
-CONSTRAINT_LIST = {
+CONSTRAINT_SET = {
+	"set" : lambda value, *set : value in set,
+	"nset" : lambda value, *set : value not in set
+}
+
+CONSTRAINT_RANGE = {
 	"range" : lambda value, a,b : value >= a and value <= b,
-	"set" : lambda value, *set : value in set 
+	"nrange" : lambda value, a,b : not (value >= a and value <= b)
 }
-
-CONSTRAINT_SET = lambda value, *args : value in args
 
 DATAFIELD_CONSTRAINT_PER_TYPE = {
-	"int" : CONSTRAINT_COMPARAISON | CONSTRAINT_RANGE,
-	"float" : CONSTRAINT_COMPARAISON | CONSTRAINT_RANGE,
-	"string" : {"set"}
+	"int" : CONSTRAINT_BINARY.keys() | CONSTRAINT_RANGE.keys() | CONSTRAINT_SET.keys(),
+	"float" : CONSTRAINT_BINARY.keys() | CONSTRAINT_RANGE.keys() | CONSTRAINT_SET.keys(),
+	"string" : CONSTRAINT_SET.keys()
 }
+
+CONSTRAINT_ALL = CONSTRAINT_BINARY | CONSTRAINT_RANGE | CONSTRAINT_SET| CONSTRAINT_UNARY
